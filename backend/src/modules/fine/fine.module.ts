@@ -5,5 +5,6 @@ import { FineController } from './fine.controller';
 @Module({
   controllers: [FineController],
   providers: [FineService],
+  exports: [FineService], // Exportar para uso em outros módulos
 })
 export class FineModule {}

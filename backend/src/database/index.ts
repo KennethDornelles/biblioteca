@@ -10,7 +10,6 @@ export { prismaConfig, testPrismaConfig, createPrismaClient, createTestPrismaCli
 export { connectionPoolConfig, sslConfig } from './prisma.config';
 
 // Schema e migrações
-export * from './schema.prisma';
 export * from './seed';
 
 // Tipos e interfaces do banco
