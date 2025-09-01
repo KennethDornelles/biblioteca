@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { parseEnvNumber, parseEnvString, parseEnvBoolean, parseEnvArray } from '../src/utils/env.utils';
-import databaseConfig from '../database.config';
+import databaseConfig from '../src/database/database.config';
 import redisConfig from '../redis.config';
 import appConfig from '../app.config';
 import securityConfig from '../security.config';

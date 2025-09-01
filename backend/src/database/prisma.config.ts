@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client';
-import { parseEnvNumber, parseEnvBoolean } from '../src/utils/env.utils';
+import { parseEnvNumber, parseEnvBoolean } from '../utils/env.utils';
 
 // Configuração do Prisma Client
 export const prismaConfig: Prisma.PrismaClientOptions = {

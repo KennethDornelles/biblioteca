@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { parseEnvNumber, parseEnvString, parseEnvBoolean } from './src/utils/env.utils';
+import { parseEnvNumber, parseEnvString, parseEnvBoolean } from '../utils/env.utils';
 
 export default registerAs('database', () => ({
   url: process.env.DATABASE_URL,
