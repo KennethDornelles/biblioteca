@@ -1,0 +1,306 @@
+// ========================================
+// SCHEMA DO PRISMA - BIBLIOTECA UNIVERSITÁRIA
+// ========================================
+// Este arquivo define a estrutura do banco de dados
+// para o sistema de gerenciamento de biblioteca universitária
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// MODELOS PRINCIPAIS
+// ========================================
+
+model Usuario {
+  id            String      @id @default(cuid())
+  nome          String      @db.VarChar(255)
+  email         String      @unique @db.VarChar(255)
+  telefone      String?     @db.VarChar(20)
+  senha         String      @db.VarChar(255)
+  dataCadastro  DateTime    @default(now())
+  tipo          TipoUsuario
+  ativo         Boolean     @default(true)
+  
+  // Campos específicos por tipo de usuário
+  matricula     String?     @db.VarChar(20)  // Para alunos
+  curso         String?     @db.VarChar(255) // Para alunos
+  nivel         NivelAluno? // Para alunos
+  departamento  String?     @db.VarChar(255) // Para professores
+  titulacao     String?     @db.VarChar(100) // Para professores
+  dataAdmissao  DateTime?   // Para professores/funcionários
+  
+  // Configurações de limite
+  limiteEmprestimos Int @default(3)
+  diasEmprestimo    Int @default(7)
+  
+  // Relacionamentos
+  emprestimos   Emprestimo[]
+  reservas      Reserva[]
+  multas        Multa[]
+  avaliacoes    Avaliacao[]
+  emprestimosRealizados Emprestimo[] @relation("EmprestimoBibliotecario")
+  
+  // Audit fields
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("usuarios")
+  @@index([email])
+  @@index([matricula])
+  @@index([tipo])
+}
+
+model Material {
+  id              String         @id @default(cuid())
+  titulo          String         @db.VarChar(500)
+  autor           String         @db.VarChar(255)
+  isbn            String?        @unique @db.VarChar(20)
+  issn            String?        @db.VarChar(20)
+  editora         String?        @db.VarChar(255)
+  anoPublicacao   Int?
+  edicao          String?        @db.VarChar(50)
+  categoria       String         @db.VarChar(100)
+  subcategoria    String?        @db.VarChar(100)
+  localizacao     String         @db.VarChar(50)  // Ex: "A-15-3"
+  status          StatusMaterial @default(DISPONIVEL)
+  tipo            TipoMaterial   @default(LIVRO)
+  
+  // Informações físicas
+  numeroPaginas   Int?
+  idioma          String         @db.VarChar(50) @default("Português")
+  descricao       String?        @db.Text
+  palavrasChave   String?        @db.Text // JSON array as string
+  
+  // Controle patrimonial
+  numeroPatrimonio String?       @unique @db.VarChar(20)
+  valorAquisicao   Decimal?      @db.Decimal(10,2)
+  dataAquisicao    DateTime?
+  fornecedor       String?       @db.VarChar(255)
+  
+  // Relacionamentos
+  emprestimos     Emprestimo[]
+  reservas        Reserva[]
+  avaliacoes      Avaliacao[]
+  
+  // Audit fields
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("materiais")
+  @@index([titulo])
+  @@index([autor])
+  @@index([isbn])
+  @@index([categoria])
+  @@index([status])
+}
+
+model Emprestimo {
+  id                String           @id @default(cuid())
+  usuarioId         String
+  materialId        String
+  bibliotecarioId   String?          // Quem fez o empréstimo
+  
+  dataEmprestimo    DateTime         @default(now())
+  dataPrevista      DateTime
+  dataDevolucao     DateTime?
+  dataRenovacao     DateTime?
+  status            StatusEmprestimo @default(ATIVO)
+  
+  // Informações de controle
+  renovacoes        Int              @default(0)
+  maxRenovacoes     Int              @default(2)
+  observacoes       String?          @db.Text
+  
+  // Relacionamentos
+  usuario           Usuario          @relation(fields: [usuarioId], references: [id])
+  material          Material         @relation(fields: [materialId], references: [id])
+  bibliotecario     Usuario?         @relation(fields: [bibliotecarioId], references: [id], name: "EmprestimoBibliotecario")
+  multas            Multa[]
+  
+  // Audit fields
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@map("emprestimos")
+  @@index([usuarioId])
+  @@index([materialId])
+  @@index([status])
+  @@index([dataEmprestimo])
+  @@index([dataPrevista])
+}
+
+model Reserva {
+  id              String        @id @default(cuid())
+  usuarioId       String
+  materialId      String
+  dataReserva     DateTime      @default(now())
+  dataExpiracao   DateTime
+  status          StatusReserva @default(ATIVA)
+  prioridade      Int           @default(1) // 1 = normal, 2 = alta, 3 = urgente
+  observacoes     String?       @db.Text
+  
+  // Relacionamentos
+  usuario         Usuario       @relation(fields: [usuarioId], references: [id])
+  material        Material      @relation(fields: [materialId], references: [id])
+  
+  // Audit fields
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@map("reservas")
+  @@index([usuarioId])
+  @@index([materialId])
+  @@index([status])
+  @@index([dataExpiracao])
+}
+
+model Multa {
+  id              String      @id @default(cuid())
+  emprestimoId    String
+  usuarioId       String
+  valor           Decimal     @db.Decimal(10,2)
+  diasAtraso      Int
+  dataCriacao     DateTime    @default(now())
+  dataVencimento  DateTime
+  dataPagamento   DateTime?
+  status          StatusMulta @default(PENDENTE)
+  descricao       String?     @db.Text
+  
+  // Relacionamentos
+  emprestimo      Emprestimo  @relation(fields: [emprestimoId], references: [id])
+  usuario         Usuario     @relation(fields: [usuarioId], references: [id])
+  
+  // Audit fields
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@map("multas")
+  @@index([usuarioId])
+  @@index([status])
+  @@index([dataVencimento])
+}
+
+model Avaliacao {
+  id          String   @id @default(cuid())
+  usuarioId   String
+  materialId  String
+  nota        Int      @db.SmallInt // 1-5 estrelas
+  comentario  String?  @db.Text
+  dataAvaliacao DateTime @default(now())
+  
+  // Relacionamentos
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+  material    Material @relation(fields: [materialId], references: [id])
+  
+  // Audit fields
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("avaliacoes")
+  @@unique([usuarioId, materialId]) // Um usuário pode avaliar apenas uma vez cada material
+  @@index([materialId])
+  @@index([nota])
+}
+
+model ConfiguracaoSistema {
+  id                    String   @id @default(cuid())
+  chave                 String   @unique
+  valor                 String   @db.Text
+  descricao             String?  @db.Text
+  tipo                  String   @db.VarChar(50) // STRING, NUMBER, BOOLEAN, JSON
+  categoria             String   @db.VarChar(100)
+  editavel              Boolean  @default(true)
+  
+  // Audit fields
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@map("configuracoes_sistema")
+  @@index([categoria])
+}
+
+// ========================================
+// ENUMS
+// ========================================
+
+enum TipoUsuario {
+  ALUNO
+  PROFESSOR
+  BIBLIOTECARIO
+  ADMIN
+  FUNCIONARIO
+  
+  @@map("tipo_usuario")
+}
+
+enum NivelAluno {
+  GRADUACAO
+  POS_GRADUACAO
+  MESTRADO
+  DOUTORADO
+  TECNICO
+  
+  @@map("nivel_aluno")
+}
+
+enum StatusMaterial {
+  DISPONIVEL
+  EMPRESTADO
+  RESERVADO
+  MANUTENCAO
+  PERDIDO
+  BAIXADO
+  
+  @@map("status_material")
+}
+
+enum TipoMaterial {
+  LIVRO
+  REVISTA
+  PERIODICO
+  DVD
+  CD
+  TESE
+  DISSERTACAO
+  MONOGRAFIA
+  ARTIGO
+  MAPA
+  OUTROS
+  
+  @@map("tipo_material")
+}
+
+enum StatusEmprestimo {
+  ATIVO
+  DEVOLVIDO
+  ATRASADO
+  RENOVADO
+  CANCELADO
+  
+  @@map("status_emprestimo")
+}
+
+enum StatusReserva {
+  ATIVA
+  ATENDIDA
+  EXPIRADA
+  CANCELADA
+  
+  @@map("status_reserva")
+}
+
+enum StatusMulta {
+  PENDENTE
+  PAGA
+  CANCELADA
+  PARCELADA
+  
+  @@map("status_multa")
+}
