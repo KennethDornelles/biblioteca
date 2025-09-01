@@ -1,4 +1,4 @@
-import { PrismaClient, TipoUsuario, NivelAluno, StatusMaterial, TipoMaterial } from '@prisma/client';
+import { PrismaClient, UserType, StudentLevel, MaterialStatus, MaterialType } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -8,18 +8,18 @@ async function main() {
 
   // Criar usuário administrador
   const adminPassword = await bcrypt.hash('admin123', 12);
-  const admin = await prisma.usuario.upsert({
+  const admin = await prisma.user.upsert({
     where: { email: 'admin@biblioteca.edu.br' },
     update: {},
     create: {
-      nome: 'Administrador do Sistema',
+      name: 'Administrador do Sistema',
       email: 'admin@biblioteca.edu.br',
-      telefone: '(11) 99999-9999',
-      senha: adminPassword,
-      tipo: TipoUsuario.ADMIN,
-      ativo: true,
-      limiteEmprestimos: 10,
-      diasEmprestimo: 30,
+      phone: '(11) 99999-9999',
+      password: adminPassword,
+      type: UserType.ADMIN,
+      active: true,
+      loanLimit: 10,
+      loanDays: 30,
     },
   });
 
@@ -27,18 +27,18 @@ async function main() {
 
   // Criar usuário bibliotecário
   const bibliotecarioPassword = await bcrypt.hash('biblio123', 12);
-  const bibliotecario = await prisma.usuario.upsert({
+  const bibliotecario = await prisma.user.upsert({
     where: { email: 'bibliotecario@biblioteca.edu.br' },
     update: {},
     create: {
-      nome: 'Bibliotecário Principal',
+      name: 'Bibliotecário Principal',
       email: 'bibliotecario@biblioteca.edu.br',
-      telefone: '(11) 88888-8888',
-      senha: bibliotecarioPassword,
-      tipo: TipoUsuario.BIBLIOTECARIO,
-      ativo: true,
-      limiteEmprestimos: 5,
-      diasEmprestimo: 15,
+      phone: '(11) 88888-8888',
+      password: bibliotecarioPassword,
+      type: UserType.LIBRARIAN,
+      active: true,
+      loanLimit: 5,
+      loanDays: 15,
     },
   });
 
@@ -46,21 +46,21 @@ async function main() {
 
   // Criar usuário aluno de exemplo
   const alunoPassword = await bcrypt.hash('aluno123', 12);
-  const aluno = await prisma.usuario.upsert({
+  const aluno = await prisma.user.upsert({
     where: { email: 'aluno@exemplo.edu.br' },
     update: {},
     create: {
-      nome: 'João Silva',
+      name: 'João Silva',
       email: 'aluno@exemplo.edu.br',
-      telefone: '(11) 77777-7777',
-      senha: alunoPassword,
-      tipo: TipoUsuario.ALUNO,
-      ativo: true,
-      matricula: '2024001',
-      curso: 'Ciência da Computação',
-      nivel: NivelAluno.GRADUACAO,
-      limiteEmprestimos: 3,
-      diasEmprestimo: 7,
+      phone: '(11) 77777-7777',
+      password: alunoPassword,
+      type: UserType.STUDENT,
+      active: true,
+      registrationNumber: '2024001',
+      course: 'Ciência da Computação',
+      level: StudentLevel.UNDERGRADUATE,
+      loanLimit: 3,
+      loanDays: 7,
     },
   });
 
@@ -68,21 +68,21 @@ async function main() {
 
   // Criar usuário professor de exemplo
   const professorPassword = await bcrypt.hash('prof123', 12);
-  const professor = await prisma.usuario.upsert({
+  const professor = await prisma.user.upsert({
     where: { email: 'professor@exemplo.edu.br' },
     update: {},
     create: {
-      nome: 'Maria Santos',
+      name: 'Maria Santos',
       email: 'professor@exemplo.edu.br',
-      telefone: '(11) 66666-6666',
-      senha: professorPassword,
-      tipo: TipoUsuario.PROFESSOR,
-      ativo: true,
-      departamento: 'Departamento de Computação',
-      titulacao: 'Doutora',
-      dataAdmissao: new Date('2020-03-01'),
-      limiteEmprestimos: 5,
-      diasEmprestimo: 21,
+      phone: '(11) 66666-6666',
+      password: professorPassword,
+      type: UserType.PROFESSOR,
+      active: true,
+      department: 'Departamento de Computação',
+      title: 'Doutora',
+      admissionDate: new Date('2020-03-01'),
+      loanLimit: 5,
+      loanDays: 21,
     },
   });
 
@@ -93,107 +93,113 @@ async function main() {
     where: { isbn: '978-85-352-1234-5' },
     update: {},
     create: {
-      titulo: 'Introdução à Programação com Python',
-      autor: 'Silva, João da',
+      title: 'Introdução à Programação com Python',
+      author: 'Silva, João da',
       isbn: '978-85-352-1234-5',
-      editora: 'Editora Exemplo',
-      anoPublicacao: 2023,
-      edicao: '1ª Edição',
-      categoria: 'Computação',
-      subcategoria: 'Programação',
-      localizacao: 'A-15-3',
-      status: StatusMaterial.DISPONIVEL,
-      tipo: TipoMaterial.LIVRO,
-      numeroPaginas: 350,
-      idioma: 'Português',
-      descricao: 'Livro introdutório sobre programação em Python',
-      palavrasChave: '["python", "programação", "iniciante"]',
-      numeroPatrimonio: 'PAT-001',
-      valorAquisicao: 89.90,
-      dataAquisicao: new Date('2023-01-15'),
-      fornecedor: 'Distribuidora Exemplo',
+      publisher: 'Editora Exemplo',
+      publicationYear: 2023,
+      edition: '3ª Edição',
+      category: 'Programação',
+      subcategory: 'Python',
+      location: 'A-15-3',
+      status: MaterialStatus.AVAILABLE,
+      type: MaterialType.BOOK,
+      numberOfPages: 350,
+      language: 'Português',
+      description: 'Livro introdutório sobre programação Python voltado para iniciantes.',
+      assetNumber: 'LV001',
+      acquisitionValue: 89.90,
+      acquisitionDate: new Date('2023-05-15'),
+      supplier: 'Distribuidora de Livros',
     },
   });
 
-  console.log('✅ Material criado:', material1.titulo);
+  console.log('✅ Material criado:', material1.title);
 
+  // Criar segundo material de exemplo
   const material2 = await prisma.material.upsert({
     where: { isbn: '978-85-352-5678-9' },
     update: {},
     create: {
-      titulo: 'Algoritmos e Estruturas de Dados',
-      autor: 'Santos, Maria dos',
+      title: 'Algoritmos e Estruturas de Dados',
+      author: 'Santos, Maria das Graças',
       isbn: '978-85-352-5678-9',
-      editora: 'Editora Exemplo',
-      anoPublicacao: 2022,
-      edicao: '2ª Edição',
-      categoria: 'Computação',
-      subcategoria: 'Algoritmos',
-      localizacao: 'A-15-4',
-      status: StatusMaterial.DISPONIVEL,
-      tipo: TipoMaterial.LIVRO,
-      numeroPaginas: 420,
-      idioma: 'Português',
-      descricao: 'Livro sobre algoritmos e estruturas de dados fundamentais',
-      palavrasChave: '["algoritmos", "estruturas de dados", "computação"]',
-      numeroPatrimonio: 'PAT-002',
-      valorAquisicao: 95.50,
-      dataAquisicao: new Date('2022-08-20'),
-      fornecedor: 'Distribuidora Exemplo',
+      publisher: 'Editora Técnica',
+      publicationYear: 2022,
+      edition: '2ª Edição',
+      category: 'Ciência da Computação',
+      subcategory: 'Algoritmos',
+      location: 'B-08-1',
+      status: MaterialStatus.AVAILABLE,
+      type: MaterialType.BOOK,
+      numberOfPages: 480,
+      language: 'Português',
+      description: 'Estudo completo sobre algoritmos e estruturas de dados.',
+      assetNumber: 'LV002',
+      acquisitionValue: 125.50,
+      acquisitionDate: new Date('2023-06-20'),
+      supplier: 'Distribuidora de Livros',
     },
   });
 
-  console.log('✅ Material criado:', material2.titulo);
+  console.log('✅ Material criado:', material2.title);
 
   // Criar configurações do sistema
   const configs = [
     {
-      chave: 'DIAS_EMPRESTIMO_ALUNO',
-      valor: '7',
-      descricao: 'Número de dias para empréstimo de alunos',
-      tipo: 'NUMBER',
-      categoria: 'emprestimos',
+      key: 'LOAN_DURATION_DAYS',
+      value: '7',
+      description: 'Duração padrão de empréstimos em dias',
+      type: 'NUMBER',
+      category: 'EMPRESTIMOS',
     },
     {
-      chave: 'DIAS_EMPRESTIMO_PROFESSOR',
-      valor: '21',
-      descricao: 'Número de dias para empréstimo de professores',
-      tipo: 'NUMBER',
-      categoria: 'emprestimos',
+      key: 'MAX_RENEWALS',
+      value: '2',
+      description: 'Número máximo de renovações por empréstimo',
+      type: 'NUMBER',
+      category: 'EMPRESTIMOS',
     },
     {
-      chave: 'LIMITE_EMPRESTIMOS_ALUNO',
-      valor: '3',
-      descricao: 'Limite de empréstimos simultâneos para alunos',
-      tipo: 'NUMBER',
-      categoria: 'emprestimos',
+      key: 'FINE_VALUE_PER_DAY',
+      value: '2.50',
+      description: 'Valor da multa por dia de atraso',
+      type: 'NUMBER',
+      category: 'MULTAS',
     },
     {
-      chave: 'LIMITE_EMPRESTIMOS_PROFESSOR',
-      valor: '5',
-      descricao: 'Limite de empréstimos simultâneos para professores',
-      tipo: 'NUMBER',
-      categoria: 'emprestimos',
+      key: 'MAX_LOAN_ITEMS',
+      value: '3',
+      description: 'Número máximo de itens por empréstimo',
+      type: 'NUMBER',
+      category: 'EMPRESTIMOS',
     },
     {
-      chave: 'MULTA_POR_DIA_ATRASO',
-      valor: '2.50',
-      descricao: 'Valor da multa por dia de atraso',
-      tipo: 'NUMBER',
-      categoria: 'multas',
+      key: 'RESERVATION_DURATION_DAYS',
+      value: '3',
+      description: 'Duração de reservas em dias',
+      type: 'NUMBER',
+      category: 'RESERVAS',
     },
     {
-      chave: 'DIAS_RESERVA_EXPIRACAO',
-      valor: '3',
-      descricao: 'Número de dias para expiração de reservas',
-      tipo: 'NUMBER',
-      categoria: 'reservas',
+      key: 'LIBRARY_NAME',
+      value: 'Biblioteca Universitária Central',
+      description: 'Nome da biblioteca',
+      type: 'STRING',
+      category: 'GERAL',
+    },
+    {
+      key: 'OPERATING_HOURS',
+      value: '{"monday": "8:00-22:00", "tuesday": "8:00-22:00", "wednesday": "8:00-22:00", "thursday": "8:00-22:00", "friday": "8:00-22:00", "saturday": "8:00-18:00", "sunday": "CLOSED"}',
+      description: 'Horários de funcionamento da biblioteca',
+      type: 'JSON',
+      category: 'GERAL',
     },
   ];
 
   for (const config of configs) {
-    await prisma.configuracaoSistema.upsert({
-      where: { chave: config.chave },
+    await prisma.systemConfiguration.upsert({
+      where: { key: config.key },
       update: {},
       create: config,
     });
