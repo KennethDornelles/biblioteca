@@ -125,6 +125,12 @@ export class UserService {
     return this.mapToResponseDto(user);
   }
 
+  async findAuthDataByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
   async findById(id: string): Promise<any> {
     const user = await this.prisma.user.findUnique({
       where: { id }
