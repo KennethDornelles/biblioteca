@@ -9,6 +9,7 @@ import { UserResponseDto } from './dto/user-response.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
 import { Prisma } from '@prisma/client';
+import { AUTH_CONFIG } from '../../config/auth.config';
 
 @Injectable()
 export class UserService {
@@ -43,7 +44,7 @@ export class UserService {
     this.validateUserTypeFields(createUserDto);
 
     // Criptografar senha
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, AUTH_CONFIG.bcrypt.saltRounds);
 
     // Preparar dados para criação
     const userData = {
@@ -122,6 +123,18 @@ export class UserService {
     }
 
     return this.mapToResponseDto(user);
+  }
+
+  async findById(id: string): Promise<any> {
+    const user = await this.prisma.user.findUnique({
+      where: { id }
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+    }
+
+    return user;
   }
 
     async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
@@ -214,7 +227,7 @@ export class UserService {
     }
 
     // Criptografar nova senha
-    const hashedNewPassword = await bcrypt.hash(changePasswordDto.newPassword, 10);
+    const hashedNewPassword = await bcrypt.hash(changePasswordDto.newPassword, AUTH_CONFIG.bcrypt.saltRounds);
 
     // Atualizar senha
     await this.prisma.user.update({

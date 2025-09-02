@@ -10,7 +10,8 @@ import {
   HttpCode, 
   HttpStatus,
   ParseUUIDPipe,
-  ValidationPipe
+  ValidationPipe,
+  UseGuards
 } from '@nestjs/common';
 import { 
   ApiTags, 
@@ -29,6 +30,9 @@ import { UserResponseDto } from './dto/user-response.dto';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UserType } from '../../enums';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('Usuários')
 @Controller('users')
@@ -36,10 +40,13 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.LIBRARIAN)
   @HttpCode(HttpStatus.CREATED)
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Criar novo usuário',
-    description: 'Cria um novo usuário no sistema com validações específicas por tipo'
+    description: 'Cria um novo usuário no sistema com validações específicas por tipo. Apenas administradores e bibliotecários podem criar usuários.'
   })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ 
@@ -52,6 +59,14 @@ export class UserController {
     description: 'Dados inválidos ou campos obrigatórios não preenchidos' 
   })
   @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acesso negado - permissão insuficiente' 
+  })
+  @ApiResponse({ 
     status: 409, 
     description: 'Email ou número de matrícula já está em uso' 
   })
@@ -60,9 +75,12 @@ export class UserController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.LIBRARIAN)
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Listar usuários',
-    description: 'Lista todos os usuários com filtros e paginação'
+    description: 'Lista todos os usuários com filtros e paginação. Apenas administradores e bibliotecários podem listar usuários.'
   })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número da página' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Itens por página' })
@@ -77,20 +95,39 @@ export class UserController {
     description: 'Lista de usuários retornada com sucesso',
     type: PaginatedUsersDto 
   })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acesso negado - permissão insuficiente' 
+  })
   async findAll(@Query(ValidationPipe) filters: UserFiltersDto): Promise<PaginatedUsersDto> {
     return this.userService.findAll(filters);
   }
 
   @Get('type/:type')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.LIBRARIAN)
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Listar usuários por tipo',
-    description: 'Lista todos os usuários de um tipo específico'
+    description: 'Lista todos os usuários de um tipo específico. Apenas administradores e bibliotecários podem acessar.'
   })
   @ApiParam({ name: 'type', enum: UserType, description: 'Tipo de usuário' })
   @ApiResponse({ 
     status: 200, 
     description: 'Lista de usuários por tipo retornada com sucesso',
     type: [UserResponseDto] 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acesso negado - permissão insuficiente' 
   })
   async findByType(@Param('type') type: UserType): Promise<UserResponseDto[]> {
     return this.userService.findByType(type);
@@ -127,15 +164,26 @@ export class UserController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.LIBRARIAN)
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Buscar usuário por ID',
-    description: 'Retorna um usuário específico pelo seu ID'
+    description: 'Retorna um usuário específico pelo seu ID. Apenas administradores e bibliotecários podem acessar.'
   })
   @ApiParam({ name: 'id', description: 'ID do usuário' })
   @ApiResponse({ 
     status: 200, 
     description: 'Usuário encontrado com sucesso',
     type: UserResponseDto 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acesso negado - permissão insuficiente' 
   })
   @ApiResponse({ 
     status: 404, 
@@ -165,9 +213,12 @@ export class UserController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.LIBRARIAN)
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Atualizar usuário',
-    description: 'Atualiza os dados de um usuário existente'
+    description: 'Atualiza os dados de um usuário existente. Apenas administradores e bibliotecários podem atualizar usuários.'
   })
   @ApiParam({ name: 'id', description: 'ID do usuário' })
   @ApiBody({ type: UpdateUserDto })
@@ -179,6 +230,14 @@ export class UserController {
   @ApiResponse({ 
     status: 400, 
     description: 'Dados inválidos ou campos obrigatórios não preenchidos' 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acesso negado - permissão insuficiente' 
   })
   @ApiResponse({ 
     status: 404, 
@@ -196,9 +255,12 @@ export class UserController {
   }
 
   @Patch(':id/change-password')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.LIBRARIAN)
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Alterar senha',
-    description: 'Altera a senha de um usuário existente'
+    description: 'Altera a senha de um usuário existente. Apenas administradores e bibliotecários podem alterar senhas.'
   })
   @ApiParam({ name: 'id', description: 'ID do usuário' })
   @ApiBody({ type: ChangePasswordDto })
@@ -212,6 +274,14 @@ export class UserController {
     description: 'Senha atual incorreta ou confirmação não confere' 
   })
   @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acesso negado - permissão insuficiente' 
+  })
+  @ApiResponse({ 
     status: 404, 
     description: 'Usuário não encontrado' 
   })
@@ -223,15 +293,26 @@ export class UserController {
   }
 
   @Patch(':id/activate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.LIBRARIAN)
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Ativar usuário',
-    description: 'Ativa um usuário previamente desativado'
+    description: 'Ativa um usuário previamente desativado. Apenas administradores e bibliotecários podem ativar usuários.'
   })
   @ApiParam({ name: 'id', description: 'ID do usuário' })
   @ApiResponse({ 
     status: 200, 
     description: 'Usuário ativado com sucesso',
     type: UserResponseDto 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acesso negado - permissão insuficiente' 
   })
   @ApiResponse({ 
     status: 404, 
@@ -242,15 +323,26 @@ export class UserController {
   }
 
   @Patch(':id/deactivate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN, UserType.LIBRARIAN)
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Desativar usuário',
-    description: 'Desativa um usuário (soft delete)'
+    description: 'Desativa um usuário (soft delete). Apenas administradores e bibliotecários podem desativar usuários.'
   })
   @ApiParam({ name: 'id', description: 'ID do usuário' })
   @ApiResponse({ 
     status: 200, 
     description: 'Usuário desativado com sucesso',
     type: UserResponseDto 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acesso negado - permissão insuficiente' 
   })
   @ApiResponse({ 
     status: 404, 
@@ -261,10 +353,13 @@ export class UserController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserType.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Excluir usuário',
-    description: 'Exclui permanentemente um usuário (apenas se não tiver empréstimos ou reservas ativas)'
+    description: 'Exclui permanentemente um usuário (apenas se não tiver empréstimos ou reservas ativas). Apenas administradores podem excluir usuários.'
   })
   @ApiParam({ name: 'id', description: 'ID do usuário' })
   @ApiResponse({ 
@@ -274,6 +369,14 @@ export class UserController {
   @ApiResponse({ 
     status: 400, 
     description: 'Não é possível excluir usuário com empréstimos ou reservas ativas' 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acesso negado - permissão insuficiente' 
   })
   @ApiResponse({ 
     status: 404, 

@@ -27,6 +27,9 @@
 - [Recursos Implementados](./backend/RECURSOS_IMPLEMENTADOS.md) - Funcionalidades e recursos disponíveis
 - [Notas de Migração](./backend/NOTAS_MIGRACAO.md) - Migração de diretórios e estrutura
 - [Módulo de Usuário](./backend/MODULO_USUARIO.md) - Documentação completa do módulo de usuário
+- [Módulo de Autenticação](./backend/MODULO_AUTH.md) - Sistema completo de autenticação JWT
+- [Exemplos de Autenticação](./backend/EXEMPLOS_AUTH.md) - Exemplos práticos de uso dos guards
+- [Implementação Auth Completa](./backend/IMPLEMENTACAO_AUTH_COMPLETA.md) - Resumo da implementação do módulo auth
 
 ### 🎨 **Frontend (Angular)**
 - [Status Frontend](./frontend/STATUS_FRONTEND.md) - Estado atual e funcionalidades
@@ -66,6 +69,7 @@
 |------|----------------------|-----------|
 | 🎯 **Visão Geral** | [README](./README.md) | Introdução e objetivos do projeto |
 | ⚙️ **Backend** | [Documentação Técnica](./backend/DOCUMENTACAO_TECNICA.md) | API, banco de dados e configurações |
+| 🔒 **Autenticação** | [Módulo Auth](./backend/MODULO_AUTH.md) | Sistema JWT e controle de acesso |
 | 🎨 **Frontend** | [Status Frontend](./frontend/STATUS_FRONTEND.md) | Interface e componentes |
 | 🗄️ **Banco** | [Estrutura Banco](./backend/ESTRUTURA_BANCO.md) | Schema e relacionamentos |
 | 🚀 **Setup** | [Configuração Inicial](./setup/CONFIGURACAO_INICIAL.md) | Primeiros passos e ambiente |
@@ -78,7 +82,7 @@
 - ✅ **Backend**: 100% funcional com todos os módulos implementados
 - 🚧 **Frontend**: Em desenvolvimento ativo
 - 🗄️ **Banco**: Schema completo e migrações funcionais
-- 🔒 **Segurança**: Autenticação JWT e autorização implementadas
+- ✅ **Segurança**: Autenticação JWT e autorização implementadas
 - 📚 **Documentação**: Em construção (este é o início!)
 
 ---

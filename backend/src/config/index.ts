@@ -22,3 +22,6 @@ export {
   IMPORT_CONFIG,
   BACKUP_CONFIG,
 } from './user.config';
+
+// Configurações de autenticação
+export { AUTH_CONFIG } from './auth.config';

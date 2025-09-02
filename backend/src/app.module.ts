@@ -8,9 +8,10 @@ import { ReservationModule } from './modules/reservation/reservation.module';
 import { FineModule } from './modules/fine/fine.module';
 import { ReviewModule } from './modules/review/review.module';
 import { SystemConfigurationModule } from './modules/system-configuration/system-configuration.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
-  imports: [UserModule, MaterialModule, LoanModule, ReservationModule, FineModule, ReviewModule, SystemConfigurationModule],
+  imports: [AuthModule, UserModule, MaterialModule, LoanModule, ReservationModule, FineModule, ReviewModule, SystemConfigurationModule],
   controllers: [AppController],
   providers: [AppService],
 })

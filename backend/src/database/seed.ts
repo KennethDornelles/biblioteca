@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { UserType, StudentLevel, MaterialType, MaterialStatus } from '../enums';
 import { appLogger } from '../utils/logger.utils';
 import * as bcrypt from 'bcryptjs';
+import { AUTH_CONFIG } from '../config/auth.config';
 
 const prisma = new PrismaClient();
 
@@ -9,7 +10,7 @@ async function main() {
   appLogger.info('🌱 Iniciando seed do banco de dados...');
 
   // Criar usuário administrador
-  const adminPassword = await bcrypt.hash('admin123', 12);
+  const adminPassword = await bcrypt.hash('admin123', AUTH_CONFIG.bcrypt.saltRounds);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@biblioteca.edu.br' },
     update: {},
@@ -28,7 +29,7 @@ async function main() {
   appLogger.info('✅ Usuário administrador criado:', admin.email);
 
   // Criar usuário bibliotecário
-  const bibliotecarioPassword = await bcrypt.hash('biblio123', 12);
+  const bibliotecarioPassword = await bcrypt.hash('biblio123', AUTH_CONFIG.bcrypt.saltRounds);
   const bibliotecario = await prisma.user.upsert({
     where: { email: 'bibliotecario@biblioteca.edu.br' },
     update: {},
@@ -47,7 +48,7 @@ async function main() {
   appLogger.info('✅ Usuário bibliotecário criado:', bibliotecario.email);
 
   // Criar usuário aluno de exemplo
-  const alunoPassword = await bcrypt.hash('aluno123', 12);
+  const alunoPassword = await bcrypt.hash('aluno123', AUTH_CONFIG.bcrypt.saltRounds);
   const aluno = await prisma.user.upsert({
     where: { email: 'aluno@exemplo.edu.br' },
     update: {},
@@ -69,7 +70,7 @@ async function main() {
   appLogger.info('✅ Usuário aluno criado:', aluno.email);
 
   // Criar usuário professor de exemplo
-  const professorPassword = await bcrypt.hash('prof123', 12);
+  const professorPassword = await bcrypt.hash('prof123', AUTH_CONFIG.bcrypt.saltRounds);
   const professor = await prisma.user.upsert({
     where: { email: 'professor@exemplo.edu.br' },
     update: {},
