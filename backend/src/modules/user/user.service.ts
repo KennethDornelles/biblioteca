@@ -10,12 +10,16 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
 import { Prisma } from '@prisma/client';
 import { AUTH_CONFIG } from '../../config/auth.config';
+import { EventBusService, EventFactoryService } from '../../events';
 
 @Injectable()
 export class UserService {
   private prisma: PrismaClient;
 
-  constructor() {
+  constructor(
+    private readonly eventBus: EventBusService,
+    private readonly eventFactory: EventFactoryService,
+  ) {
     this.prisma = new PrismaClient();
   }
 
@@ -64,6 +68,17 @@ export class UserService {
     const user = await this.prisma.user.create({
       data: userData
     });
+
+    // Disparar evento de usuário criado
+    const userCreatedEvent = this.eventFactory.createUserCreatedEvent(
+      user.id,
+      user.email,
+      user.name,
+      user.userType,
+      user.active
+    );
+    
+    await this.eventBus.publish(userCreatedEvent);
 
     return this.mapToResponseDto(user);
   }
@@ -203,6 +218,25 @@ export class UserService {
       data: updateData
     });
 
+    // Disparar evento de usuário atualizado
+    const updatedFields = Object.keys(updateUserDto);
+    const userUpdatedEvent = this.eventFactory.createDomainEvent(
+      'user.updated',
+      updatedUser.id,
+      2, // Versão incrementada
+      {
+        userId: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        userType: updatedUser.userType,
+        isActive: updatedUser.active,
+        updatedFields,
+      },
+      updatedUser.id
+    );
+    
+    await this.eventBus.publish(userUpdatedEvent);
+
     return this.mapToResponseDto(updatedUser);
   }
 
@@ -240,6 +274,22 @@ export class UserService {
       where: { id },
       data: { password: hashedNewPassword }
     });
+
+    // Disparar evento de senha alterada
+    const passwordChangedEvent = this.eventFactory.createDomainEvent(
+      'user.password_changed',
+      user.id,
+      3, // Versão incrementada
+      {
+        userId: user.id,
+        email: user.email,
+        changedBy: user.id, // Assumindo que é o próprio usuário
+        isSelfChange: true,
+      },
+      user.id
+    );
+    
+    await this.eventBus.publish(passwordChangedEvent);
 
     return { message: 'Senha alterada com sucesso' };
   }

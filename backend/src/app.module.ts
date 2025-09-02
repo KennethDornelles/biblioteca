@@ -9,9 +9,22 @@ import { FineModule } from './modules/fine/fine.module';
 import { ReviewModule } from './modules/review/review.module';
 import { SystemConfigurationModule } from './modules/system-configuration/system-configuration.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { QueueModule } from './modules/queue/queue.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
-  imports: [AuthModule, UserModule, MaterialModule, LoanModule, ReservationModule, FineModule, ReviewModule, SystemConfigurationModule],
+  imports: [
+    EventsModule, // Módulo de eventos deve ser importado primeiro
+    AuthModule, 
+    UserModule, 
+    MaterialModule, 
+    LoanModule, 
+    ReservationModule, 
+    FineModule, 
+    ReviewModule, 
+    SystemConfigurationModule,
+    QueueModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

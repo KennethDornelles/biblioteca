@@ -113,6 +113,14 @@ Biblioteca Universitária é um **sistema completo de gerenciamento de bibliotec
 * ✅ Controle de status de pagamento
 * ✅ Sistema de isenções e descontos
 
+### 🚀 **Sistema de Filas (Bull Queue)**
+
+* ✅ Processamento assíncrono de emails e notificações
+* ✅ 4 filas especializadas (email, notification, report, maintenance)
+* ✅ Retry automático e priorização de jobs
+* ✅ Monitoramento em tempo real
+* ✅ Integração com todos os módulos existentes
+
 ---
 
 ## 📦 Desenvolvimento

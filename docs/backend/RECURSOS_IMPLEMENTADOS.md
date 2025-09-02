@@ -14,6 +14,11 @@ Este documento descreve os recursos criados para o sistema de biblioteca univers
 - **Funcionalidades**: Gerenciamento de empréstimos, renovações e devoluções
 - **Status**: ✅ Criado
 
+### 3. Sistema de Filas (Bull Queue)
+- **Arquivo**: `src/modules/queue/`
+- **Funcionalidades**: Sistema completo de filas assíncronas para emails, notificações, relatórios e manutenção
+- **Status**: ✅ Criado e Integrado
+
 ## 🏗️ Estrutura de Arquivos
 
 ### Enums (`src/enums/`)
@@ -67,6 +72,17 @@ Este documento descreve os recursos criados para o sistema de biblioteca univers
 - ✅ Filtros e busca avançada
 - ✅ Estatísticas e relatórios
 - ✅ Configurações por tipo de usuário e material
+
+### Sistema de Filas (Bull Queue)
+- ✅ 4 filas especializadas (email, notification, report, maintenance)
+- ✅ Processamento assíncrono de jobs
+- ✅ Retry automático com backoff exponencial
+- ✅ Priorização de jobs por importância
+- ✅ Monitoramento em tempo real
+- ✅ API REST completa com autenticação
+- ✅ Integração com módulos existentes
+- ✅ Tratamento robusto de erros
+- ✅ Escalabilidade horizontal
 
 ## 📊 Enums Disponíveis
 

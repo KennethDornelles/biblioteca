@@ -11,6 +11,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 
 @Module({
   imports: [
+    ConfigModule,
     UserModule,
     PassportModule,
     JwtModule.registerAsync({
