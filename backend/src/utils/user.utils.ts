@@ -118,7 +118,7 @@ export function validatePasswordStrength(password: string): {
 /**
  * Sanitiza dados de entrada do usuário
  */
-export function sanitizeUserInput(input: any): any {
+export function sanitizeUserInput(input: string | number | boolean | null | undefined): string | number | boolean | null | undefined {
   if (typeof input === 'string') {
     return input.trim();
   }

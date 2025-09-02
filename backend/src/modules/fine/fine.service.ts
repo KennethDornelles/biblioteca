@@ -7,7 +7,8 @@ import { PaginatedFinesDto } from './dto/paginated-fines.dto';
 import { FineResponseDto } from './dto/fine-response.dto';
 import { FineStatisticsDto } from './dto/fine-statistics.dto';
 import { FinePaymentDto, FineInstallmentDto } from './dto/fine-payment.dto';
-import { FINE_STATUS_LABELS, FINE_STATUS_COLORS, FINE_STATUS_ICONS } from '../../enums';
+import { FineStatus as AppFineStatus, FINE_STATUS_LABELS, FINE_STATUS_COLORS, FINE_STATUS_ICONS } from '../../enums';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class FineService {
@@ -191,7 +192,11 @@ export class FineService {
       throw new NotFoundException('Multa não encontrada');
     }
 
-    const updateData: any = {};
+    const updateData: Partial<{
+      status: FineStatus;
+      description: string;
+      dueDate: Date;
+    }> = {};
 
     if (updateFineDto.status !== undefined) {
       updateData.status = updateFineDto.status;
@@ -268,7 +273,11 @@ export class FineService {
       throw new BadRequestException('Valor do pagamento deve ser igual ou maior ao valor da multa');
     }
 
-    const updateData: any = {
+    const updateData: Partial<{
+      status: FineStatus;
+      paymentDate: Date;
+      description: string;
+    }> = {
       status: FineStatus.PAID,
       paymentDate: paymentDto.paymentDate ? new Date(paymentDto.paymentDate) : new Date(),
     };
@@ -366,7 +375,10 @@ export class FineService {
       throw new BadRequestException('Valor total das parcelas deve ser igual ao valor da multa');
     }
 
-    const updateData: any = {
+    const updateData: Partial<{
+      status: FineStatus;
+      description: string;
+    }> = {
       status: FineStatus.INSTALLMENT,
       description: fine.description
         ? `${fine.description} | Parcelado em ${installmentDto.numberOfInstallments}x de R$ ${installmentDto.installmentAmount.toFixed(2)}`
@@ -515,8 +527,8 @@ export class FineService {
     };
   }
 
-  private buildWhereClause(filters: Partial<FineFiltersDto>): any {
-    const where: any = {};
+  private buildWhereClause(filters: Partial<FineFiltersDto>): Prisma.FineWhereInput {
+    const where: Prisma.FineWhereInput = {};
 
     if (filters.userId) {
       where.userId = filters.userId;
@@ -586,7 +598,12 @@ export class FineService {
     return where;
   }
 
-  private mapToResponseDto(fine: any): FineResponseDto {
+  private mapToResponseDto(fine: Prisma.FineGetPayload<{
+    include: {
+      user: { select: { id: true; name: true; email: true; registrationNumber: true } };
+      loan: { select: { id: true; materialId: true; loanDate: true; dueDate: true; material: { select: { title: true; author: true } } } };
+    };
+  }>): FineResponseDto {
     const now = new Date();
     const isOverdue = fine.dueDate < now;
     const daysUntilDue = Math.ceil(
@@ -601,9 +618,9 @@ export class FineService {
       daysOverdue: fine.daysOverdue,
       creationDate: fine.creationDate,
       dueDate: fine.dueDate,
-      paymentDate: fine.paymentDate,
-      status: fine.status,
-      description: fine.description,
+      paymentDate: fine.paymentDate ?? undefined,
+      status: fine.status as AppFineStatus,
+      description: fine.description ?? undefined,
       createdAt: fine.createdAt,
       updatedAt: fine.updatedAt,
       statusLabel: FINE_STATUS_LABELS[fine.status],
@@ -615,7 +632,10 @@ export class FineService {
         style: 'currency',
         currency: 'BRL',
       }).format(fine.amount.toNumber()),
-      user: fine.user,
+      user: {
+        ...fine.user,
+        registrationNumber: fine.user.registrationNumber ?? undefined,
+      },
       loan: fine.loan,
     };
   }

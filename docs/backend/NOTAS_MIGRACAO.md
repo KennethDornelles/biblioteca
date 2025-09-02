@@ -168,4 +168,3 @@ import {
 ## Verificação
 
 Após a migração, todos os imports foram atualizados e os testes devem continuar funcionando. A estrutura está mais organizada e segue as melhores práticas de organização de código.
-

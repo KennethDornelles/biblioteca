@@ -8,6 +8,7 @@ import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -123,7 +124,7 @@ export class UserService {
     return this.mapToResponseDto(user);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+    async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
     // Verificar se o usuário existe
     const existingUser = await this.prisma.user.findUnique({
       where: { id }
@@ -156,7 +157,19 @@ export class UserService {
     }
 
     // Validar campos específicos por tipo de usuário
-    this.validateUserTypeFields({ ...existingUser, ...updateUserDto });
+    const userForValidation: Partial<CreateUserDto> = {
+      ...existingUser,
+      ...updateUserDto,
+      type: (updateUserDto.type ?? existingUser.type) as UserType,
+      phone: updateUserDto.phone ?? existingUser.phone ?? undefined,
+      registrationNumber: updateUserDto.registrationNumber ?? existingUser.registrationNumber ?? undefined,
+      course: updateUserDto.course ?? existingUser.course ?? undefined,
+      level: (updateUserDto.level ?? existingUser.level) as StudentLevel | undefined,
+      department: updateUserDto.department ?? existingUser.department ?? undefined,
+      title: updateUserDto.title ?? existingUser.title ?? undefined,
+      admissionDate: updateUserDto.admissionDate ?? existingUser.admissionDate?.toISOString().substring(0, 10) ?? undefined,
+    };
+    this.validateUserTypeFields(userForValidation);
 
     // Preparar dados para atualização
     const updateData = { ...updateUserDto };
@@ -305,7 +318,7 @@ export class UserService {
     return users.map(user => this.mapToResponseDto(user));
   }
 
-  private validateUserTypeFields(userData: any): void {
+  private validateUserTypeFields(userData: Partial<CreateUserDto>): void {
     const { type, registrationNumber, course, level, department, title } = userData;
 
     if (type === UserType.STUDENT) {
@@ -330,8 +343,8 @@ export class UserService {
     }
   }
 
-  private buildWhereClause(filters: any): any {
-    const where: any = {};
+  private buildWhereClause(filters: Partial<UserFiltersDto>): Prisma.UserWhereInput {
+    const where: Prisma.UserWhereInput = {};
 
     if (filters.name) {
       where.name = { contains: filters.name, mode: 'insensitive' };

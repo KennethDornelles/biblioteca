@@ -19,7 +19,7 @@ export default registerAs('security', () => ({
     cookieHttpOnly: parseEnvBoolean(process.env.SESSION_COOKIE_HTTP_ONLY, true),
   },
   cors: {
-    origin: parseEnvArray(process.env.CORS_ORIGIN, ['http://localhost:3000', 'http://localhost:4200']),
+    origin: parseEnvArray(process.env.CORS_ORIGIN, []),
     credentials: parseEnvBoolean(process.env.CORS_CREDENTIALS, true),
     methods: parseEnvArray(process.env.CORS_METHODS, ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE']),
   },
@@ -48,7 +48,7 @@ export const securityConfig = {
     cookieHttpOnly: parseEnvBoolean(process.env.SESSION_COOKIE_HTTP_ONLY, true),
   },
   cors: {
-    origin: parseEnvArray(process.env.CORS_ORIGIN, ['http://localhost:3000', 'http://localhost:4200']),
+    origin: parseEnvArray(process.env.CORS_ORIGIN, []),
     credentials: parseEnvBoolean(process.env.CORS_CREDENTIALS, true),
     methods: parseEnvArray(process.env.CORS_METHODS, ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE']),
   },

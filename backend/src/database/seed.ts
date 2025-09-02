@@ -1,10 +1,12 @@
-import { PrismaClient, UserType, StudentLevel, MaterialStatus, MaterialType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { UserType, StudentLevel, MaterialType, MaterialStatus } from '../enums';
+import { appLogger } from '../utils/logger.utils';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando seed do banco de dados...');
+  appLogger.info('🌱 Iniciando seed do banco de dados...');
 
   // Criar usuário administrador
   const adminPassword = await bcrypt.hash('admin123', 12);
@@ -23,7 +25,7 @@ async function main() {
     },
   });
 
-  console.log('✅ Usuário administrador criado:', admin.email);
+  appLogger.info('✅ Usuário administrador criado:', admin.email);
 
   // Criar usuário bibliotecário
   const bibliotecarioPassword = await bcrypt.hash('biblio123', 12);
@@ -42,7 +44,7 @@ async function main() {
     },
   });
 
-  console.log('✅ Usuário bibliotecário criado:', bibliotecario.email);
+  appLogger.info('✅ Usuário bibliotecário criado:', bibliotecario.email);
 
   // Criar usuário aluno de exemplo
   const alunoPassword = await bcrypt.hash('aluno123', 12);
@@ -64,7 +66,7 @@ async function main() {
     },
   });
 
-  console.log('✅ Usuário aluno criado:', aluno.email);
+  appLogger.info('✅ Usuário aluno criado:', aluno.email);
 
   // Criar usuário professor de exemplo
   const professorPassword = await bcrypt.hash('prof123', 12);
@@ -86,7 +88,7 @@ async function main() {
     },
   });
 
-  console.log('✅ Usuário professor criado:', professor.email);
+  appLogger.info('✅ Usuário professor criado:', professor.email);
 
   // Criar materiais de exemplo
   const material1 = await prisma.material.upsert({
@@ -114,7 +116,7 @@ async function main() {
     },
   });
 
-  console.log('✅ Material criado:', material1.title);
+  appLogger.info('✅ Material criado:', material1.title);
 
   // Criar segundo material de exemplo
   const material2 = await prisma.material.upsert({
@@ -142,7 +144,7 @@ async function main() {
     },
   });
 
-  console.log('✅ Material criado:', material2.title);
+  appLogger.info('✅ Material criado:', material2.title);
 
   // Criar configurações do sistema
   const configs = [
@@ -205,14 +207,14 @@ async function main() {
     });
   }
 
-  console.log('✅ Configurações do sistema criadas');
+  appLogger.info('✅ Configurações do sistema criadas');
 
-  console.log('🎉 Seed concluído com sucesso!');
+  appLogger.info('🎉 Seed concluído com sucesso!');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Erro durante o seed:', e);
+    appLogger.error('❌ Erro durante o seed:', e);
     process.exit(1);
   })
   .finally(async () => {

@@ -7,7 +7,8 @@ import { PaginatedReservationsDto } from './dto/paginated-reservations.dto';
 import { ReservationResponseDto } from './dto/reservation-response.dto';
 import { ReservationStatisticsDto } from './dto/reservation-statistics.dto';
 import { ReservationQueueDto } from './dto/reservation-queue.dto';
-import { RESERVATION_STATUS_LABELS, RESERVATION_STATUS_COLORS, RESERVATION_STATUS_ICONS } from '../../enums';
+import { ReservationStatus as AppReservationStatus, RESERVATION_STATUS_LABELS, RESERVATION_STATUS_COLORS, RESERVATION_STATUS_ICONS } from '../../enums';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ReservationService {
@@ -186,7 +187,12 @@ export class ReservationService {
     }
 
     // Preparar dados para atualização
-    const updateData: any = {};
+    const updateData: Partial<{
+      status: ReservationStatus;
+      priority: number;
+      observations: string;
+      expirationDate: Date;
+    }> = {};
     
     if (updateReservationDto.status !== undefined) {
       updateData.status = updateReservationDto.status;
@@ -473,8 +479,8 @@ export class ReservationService {
     };
   }
 
-  private buildWhereClause(filters: Partial<ReservationFiltersDto>): any {
-    const where: any = {};
+  private buildWhereClause(filters: Partial<ReservationFiltersDto>): Prisma.ReservationWhereInput {
+    const where: Prisma.ReservationWhereInput = {};
 
     if (filters.userId) {
       where.userId = filters.userId;
@@ -534,7 +540,12 @@ export class ReservationService {
     return where;
   }
 
-  private mapToResponseDto(reservation: any): ReservationResponseDto {
+    private mapToResponseDto(reservation: Prisma.ReservationGetPayload<{
+    include: {
+      user: { select: { id: true; name: true; email: true; registrationNumber: true } };
+      material: { select: { id: true; title: true; author: true; isbn: true; assetNumber: true; status: true } };
+    };
+  }>): ReservationResponseDto {
     const now = new Date();
     const isExpired = reservation.expirationDate < now;
     const daysUntilExpiration = Math.ceil(
@@ -547,9 +558,9 @@ export class ReservationService {
       materialId: reservation.materialId,
       reservationDate: reservation.reservationDate,
       expirationDate: reservation.expirationDate,
-      status: reservation.status,
+      status: reservation.status as AppReservationStatus,
       priority: reservation.priority,
-      observations: reservation.observations,
+      observations: reservation.observations ?? undefined,
       createdAt: reservation.createdAt,
       updatedAt: reservation.updatedAt,
       statusLabel: RESERVATION_STATUS_LABELS[reservation.status],
@@ -557,8 +568,16 @@ export class ReservationService {
       statusIcon: RESERVATION_STATUS_ICONS[reservation.status],
       isExpired,
       daysUntilExpiration,
-      user: reservation.user,
-      material: reservation.material
+      user: {
+        ...reservation.user,
+        registrationNumber: reservation.user.registrationNumber ?? undefined,
+      },
+      material: {
+        ...reservation.material,
+        isbn: reservation.material.isbn ?? undefined,
+        assetNumber: reservation.material.assetNumber ?? undefined,
+        status: reservation.material.status as string,
+      }
     };
   }
 }

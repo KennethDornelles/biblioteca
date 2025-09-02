@@ -28,3 +28,6 @@ export {
   isValidDate,
   parseDate,
 } from './user.utils';
+
+// Logger da aplicação
+export { AppLogger, appLogger } from './logger.utils';
