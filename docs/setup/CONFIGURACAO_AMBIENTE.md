@@ -112,23 +112,35 @@ Configurações de JWT, senhas, CORS, etc.
 ### `app.config.ts` - Configuração da Aplicação
 Configurações gerais da aplicação.
 
-## 🐳 Configuração Docker
+## 🐳 Configuração com Docker
 
-### Variáveis de Ambiente no Docker Compose
-```yaml
-services:
-  api:
-    env_file:
-      - docker.env
-    environment:
-      NODE_ENV: development
-```
+O ambiente foi configurado para usar o Docker e o Docker Compose, com separação clara entre os ambientes de desenvolvimento e produção.
 
-### Build da Aplicação
-```bash
-docker-compose build api
-docker-compose up -d api
-```
+### Para Desenvolvimento
+
+1.  **Variáveis de Ambiente:**
+    *   Copie o arquivo `env.example` para `docker.env` (se ainda não existir).
+    *   Preencha as variáveis em `docker.env` com as configurações para o banco de dados e outras ferramentas.
+
+2.  **Executando o Ambiente:**
+    *   No diretório `backend`, execute o comando:
+        ```bash
+        docker-compose up
+        ```
+    *   O Docker Compose utilizará os arquivos `docker-compose.yml` e `docker-compose.override.yml` para construir a imagem de desenvolvimento (`Dockerfile.dev`) e iniciar os serviços. A aplicação principal (`api`) iniciará em modo de desenvolvimento com hot-reload.
+
+### Para Produção
+
+1.  **Variáveis de Ambiente:**
+    *   Crie um arquivo `.env.prod` no diretório `backend`.
+    *   Preencha este arquivo com as variáveis de ambiente de produção (senhas fortes, chaves secretas diferentes do desenvolvimento, etc.).
+
+2.  **Executando o Ambiente:**
+    *   Para construir a imagem de produção e iniciar os contêineres, utilize o comando:
+        ```bash
+        docker-compose -f docker-compose.prod.yml up --build -d
+        ```
+    *   Isso usará o `Dockerfile` principal (otimizado para produção) e o `docker-compose.prod.yml`. O script `entrypoint.sh` garantirá que as migrações do banco de dados (`prisma migrate deploy`) sejam executadas antes de iniciar a aplicação.
 
 ## 🔧 Troubleshooting
 

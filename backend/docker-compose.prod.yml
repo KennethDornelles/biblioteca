@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: biblioteca-postgres-prod
+    env_file:
+      - .env.prod
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - biblioteca-network-prod
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: biblioteca-redis-prod
+    volumes:
+      - redis_data_prod:/data
+    networks:
+      - biblioteca-network-prod
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: biblioteca-api-prod
+    env_file:
+      - .env.prod
+    ports:
+      - "3000:3000"
+    networks:
+      - biblioteca-network-prod
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
+
+networks:
+  biblioteca-network-prod:
+    driver: bridge

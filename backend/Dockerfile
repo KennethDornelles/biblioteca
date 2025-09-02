@@ -3,46 +3,38 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copiar arquivos de dependências
 COPY package*.json ./
-COPY prisma ./prisma/
+RUN npm ci
 
-# Instalar dependências
-RUN npm ci --only=production
-
-# Gerar cliente Prisma
-RUN npx prisma generate
-
-# Copiar código fonte
 COPY . .
 
-# Build da aplicação
+RUN npx prisma generate
 RUN npm run build
+RUN npm prune --production
 
 # Estágio de produção
 FROM node:18-alpine AS production
 
 WORKDIR /app
 
-# Criar usuário não-root
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
+RUN apk add --no-cache curl
+RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
 
-# Copiar arquivos do estágio de build
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
 COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
 
-# Mudar para usuário não-root
+# Copy entrypoint script
+COPY --chown=nestjs:nodejs entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
 USER nestjs
 
-# Expor porta
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node dist/main.js || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 
+  CMD curl -f http://localhost:3000/ || exit 1
 
-# Comando para executar a aplicação
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["npm", "run", "start:prod"]

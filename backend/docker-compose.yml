@@ -4,17 +4,12 @@ services:
   postgres:
     image: postgres:15
     container_name: biblioteca-postgres
-    environment:
-      POSTGRES_DB: biblioteca_universitaria
-      POSTGRES_USER: biblioteca
-      POSTGRES_PASSWORD: 123456
     env_file:
       - docker.env
     ports:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./prisma/migrations:/docker-entrypoint-initdb.d
     networks:
       - biblioteca-network
     restart: unless-stopped
@@ -30,19 +25,10 @@ services:
       - biblioteca-network
     restart: unless-stopped
 
-  # Aplicação principal
   api:
-    build: .
     container_name: biblioteca-api
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: development
     env_file:
       - docker.env
-    volumes:
-      - .:/app
-      - /app/node_modules
     networks:
       - biblioteca-network
     depends_on:
@@ -50,7 +36,6 @@ services:
       - redis
     restart: unless-stopped
 
-  # Opcional: pgAdmin para gerenciar o PostgreSQL
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: biblioteca-pgadmin

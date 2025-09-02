@@ -25,30 +25,34 @@ Sistema de Gerenciamento de Biblioteca Universitária - API REST desenvolvida co
 
 ### Opção 1: Usando Docker (Recomendado)
 
-1. **Clone o repositório**
-```bash
-git clone <url-do-repositorio>
-cd biblioteca_universitaria/backend
-```
+1.  **Clone o repositório**
+    ```bash
+    git clone <url-do-repositorio>
+    cd biblioteca_universitaria/backend
+    ```
 
-2. **Inicie os serviços com Docker Compose**
-```bash
-docker-compose up -d
-```
+2.  **Configure as variáveis de ambiente para desenvolvimento**
+    *   Copie `env.example` para `docker.env`.
+        ```bash
+        cp env.example docker.env
+        ```
+    *   **Importante:** Verifique e preencha as variáveis em `docker.env` conforme necessário.
 
-3. **Configure as variáveis de ambiente**
-```bash
-cp env.example .env
-# O arquivo .env já está configurado para Docker
-```
+3.  **Inicie os serviços com Docker Compose**
+    *   Execute o comando a seguir. Ele usará `docker-compose.yml` e `docker-compose.override.yml` para subir o ambiente de desenvolvimento com hot-reload.
+        ```bash
+        docker-compose up
+        ```
+    *   A primeira vez que você executar, o compose fará o build da imagem de desenvolvimento, o que pode levar alguns minutos.
+    *   As migrações do banco de dados **não são executadas automaticamente** em ambiente de desenvolvimento. Para executar as migrações, você pode abrir outro terminal e rodar:
+        ```bash
+        docker-compose exec api npm run prisma:migrate
+        ```
+        Ou, para popular o banco:
+        ```bash
+        docker-compose exec api npm run db:setup
+        ```
 
-4. **Execute as migrações e seed**
-```bash
-npm install
-npm run prisma:generate
-npm run prisma:migrate
-npm run prisma:seed
-```
 
 ### Opção 2: Instalação Local
 
@@ -284,42 +288,32 @@ src/
 - **Morgan**: Logs de requisições HTTP
 - **Métricas**: Coleta de métricas de performance
 
-## 🚀 Deploy
+## 🚀 Deploy (Produção com Docker)
 
-### Docker
+O projeto está configurado para deploy em produção utilizando Docker Compose.
 
-#### Usando Docker Compose (Recomendado)
-```bash
-# Iniciar todos os serviços
-docker-compose up -d
+1.  **Arquivo de Ambiente de Produção**
+    *   Crie um arquivo `.env.prod` no diretório `backend`.
+    *   Preencha este arquivo com as configurações de produção (senhas, chaves JWT, etc.). **Nunca use os valores de desenvolvimento em produção.**
 
-# Ver logs
-docker-compose logs -f
+2.  **Execute o Docker Compose para Produção**
+    *   Use o seguinte comando para construir a imagem de produção e iniciar os serviços em background:
+        ```bash
+        docker-compose -f docker-compose.prod.yml up --build -d
+        ```
+    *   Este comando utiliza o `docker-compose.prod.yml`, que é otimizado para um ambiente de produção.
+    *   O `entrypoint.sh` configurado no `Dockerfile` irá garantir que as migrações (`npm run prisma:deploy`) sejam executadas automaticamente antes da aplicação iniciar.
 
-# Parar serviços
-docker-compose down
+3.  **Gerenciando o Ambiente de Produção**
+    *   **Ver logs:**
+        ```bash
+        docker-compose -f docker-compose.prod.yml logs -f
+        ```
+    *   **Parar os serviços:**
+        ```bash
+        docker-compose -f docker-compose.prod.yml down
+        ```
 
-# Rebuild e reiniciar
-docker-compose up -d --build
-```
-
-#### Usando Docker diretamente
-```bash
-# Build da imagem
-docker build -t biblioteca-api .
-
-# Executar container
-docker run -p 3000:3000 biblioteca-api
-```
-
-### Produção
-```bash
-# Build de produção
-npm run build
-
-# Start de produção
-npm run start:prod
-```
 
 ## 🤝 Contribuição
 
