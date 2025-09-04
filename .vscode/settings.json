@@ -1,6 +1,7 @@
 {
     "vsicons.presets.nestjs": true,
     "conventionalCommits.scopes": [
-        "docker"
+        "docker",
+        "notification"
     ]
 }
