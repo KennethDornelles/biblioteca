@@ -74,7 +74,7 @@ export class UserService {
       user.id,
       user.email,
       user.name,
-      user.userType,
+      user.type,
       user.active
     );
     
@@ -228,7 +228,7 @@ export class UserService {
         userId: updatedUser.id,
         email: updatedUser.email,
         name: updatedUser.name,
-        userType: updatedUser.userType,
+        userType: updatedUser.type, // This line
         isActive: updatedUser.active,
         updatedFields,
       },

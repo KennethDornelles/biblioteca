@@ -10,7 +10,7 @@ export class LoanResponseDto {
   returnDate?: Date;
   renewalDate?: Date;
   status: LoanStatus;
-  renewals: number;
+  renewalCount: number;
   maxRenewals: number;
   observations?: string;
   createdAt: Date;

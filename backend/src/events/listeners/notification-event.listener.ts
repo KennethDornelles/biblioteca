@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { QueueService } from '../../modules/queue/queue.service';
-import { 
+import { NotificationType, JobPriority } from '../../modules/queue/interfaces/queue.interfaces';
+import type { 
   UserEvent, 
   LoanEvent, 
   ReservationEvent, 
@@ -25,11 +26,11 @@ export class NotificationEventListener {
   async handleUserLogin(event: UserEvent) {
     if (event.eventType === 'user.login') {
       await this.queueService.addNotificationJob({
-        type: 'login_success',
+        type: NotificationType.LOGIN_SUCCESS,
         userId: event.data.userId,
         title: 'Login realizado com sucesso',
         message: `Bem-vindo de volta, ${event.data.email}!`,
-        priority: 'normal',
+        priority: JobPriority.NORMAL,
         data: {
           loginTime: event.data.loginTime,
           ipAddress: event.data.ipAddress,
@@ -45,11 +46,11 @@ export class NotificationEventListener {
   async handleLoanCreated(event: LoanEvent) {
     if (event.eventType === 'loan.created') {
       await this.queueService.addNotificationJob({
-        type: 'loan_created',
+        type: NotificationType.LOAN_CREATED,
         userId: event.data.userId,
         title: 'Empréstimo realizado',
         message: `Seu empréstimo foi confirmado. Data de devolução: ${new Date(event.data.dueDate).toLocaleDateString('pt-BR')}`,
-        priority: 'normal',
+        priority: JobPriority.NORMAL,
         data: {
           loanId: event.data.loanId,
           materialId: event.data.materialId,
@@ -63,11 +64,11 @@ export class NotificationEventListener {
   async handleLoanExpiringSoon(event: LoanEvent) {
     if (event.eventType === 'loan.expiring_soon') {
       await this.queueService.addNotificationJob({
-        type: 'loan_reminder',
+        type: NotificationType.LOAN_REMINDER,
         userId: event.data.userId,
         title: 'Empréstimo vence em breve',
         message: `Seu empréstimo vence em ${event.data.daysUntilDue} dias. Considere renovar ou devolver.`,
-        priority: 'high',
+        priority: JobPriority.HIGH,
         data: {
           loanId: event.data.loanId,
           materialId: event.data.materialId,
@@ -81,11 +82,11 @@ export class NotificationEventListener {
   async handleLoanOverdue(event: LoanEvent) {
     if (event.eventType === 'loan.overdue') {
       await this.queueService.addNotificationJob({
-        type: 'loan_overdue',
+        type: NotificationType.LOAN_OVERDUE,
         userId: event.data.userId,
         title: 'Empréstimo em atraso',
         message: `Seu empréstimo está ${event.data.daysOverdue} dias em atraso. Multa aplicada.`,
-        priority: 'urgent',
+        priority: JobPriority.URGENT,
         data: {
           loanId: event.data.loanId,
           materialId: event.data.materialId,
@@ -100,13 +101,13 @@ export class NotificationEventListener {
   async handleLoanReturned(event: LoanEvent) {
     if (event.eventType === 'loan.returned') {
       await this.queueService.addNotificationJob({
-        type: 'loan_returned',
+        type: NotificationType.LOAN_RETURNED,
         userId: event.data.userId,
         title: 'Empréstimo devolvido',
         message: event.data.isOverdue 
           ? `Empréstimo devolvido com ${event.data.daysOverdue} dias de atraso. Multa aplicada.`
           : 'Empréstimo devolvido com sucesso!',
-        priority: 'normal',
+        priority: JobPriority.NORMAL,
         data: {
           loanId: event.data.loanId,
           materialId: event.data.materialId,
@@ -124,11 +125,11 @@ export class NotificationEventListener {
   async handleReservationCreated(event: ReservationEvent) {
     if (event.eventType === 'reservation.created') {
       await this.queueService.addNotificationJob({
-        type: 'reservation_created',
+        type: NotificationType.RESERVATION_CREATED,
         userId: event.data.userId,
         title: 'Reserva confirmada',
         message: `Você está na posição ${event.data.queuePosition} da fila. Expira em ${new Date(event.data.expirationDate).toLocaleDateString('pt-BR')}`,
-        priority: 'normal',
+        priority: JobPriority.NORMAL,
         data: {
           reservationId: event.data.reservationId,
           materialId: event.data.materialId,
@@ -143,11 +144,11 @@ export class NotificationEventListener {
   async handleReservationFulfilled(event: ReservationEvent) {
     if (event.eventType === 'reservation.fulfilled') {
       await this.queueService.addNotificationJob({
-        type: 'reservation_fulfilled',
+        type: NotificationType.RESERVATION_FULFILLED,
         userId: event.data.userId,
         title: 'Reserva disponível!',
         message: 'Sua reserva está disponível para retirada. Você tem 48 horas para retirar.',
-        priority: 'high',
+        priority: JobPriority.HIGH,
         data: {
           reservationId: event.data.reservationId,
           materialId: event.data.materialId,
@@ -161,11 +162,11 @@ export class NotificationEventListener {
   async handleReservationExpiringSoon(event: ReservationEvent) {
     if (event.eventType === 'reservation.expiring_soon') {
       await this.queueService.addNotificationJob({
-        type: 'reservation_reminder',
+        type: NotificationType.RESERVATION_REMINDER,
         userId: event.data.userId,
         title: 'Reserva expira em breve',
         message: `Sua reserva expira em ${event.data.daysUntilExpiration} dias.`,
-        priority: 'high',
+        priority: JobPriority.HIGH,
         data: {
           reservationId: event.data.reservationId,
           materialId: event.data.materialId,
@@ -179,11 +180,11 @@ export class NotificationEventListener {
   async handleReservationQueueUpdated(event: ReservationEvent) {
     if (event.eventType === 'reservation.queue_updated' && event.data.nextInQueue) {
       await this.queueService.addNotificationJob({
-        type: 'queue_position_updated',
+        type: NotificationType.QUEUE_POSITION_UPDATED,
         userId: event.data.nextInQueue.userId,
         title: 'Sua vez na fila!',
         message: 'Você é o próximo na fila de reservas. Prepare-se para receber a notificação de disponibilidade.',
-        priority: 'normal',
+        priority: JobPriority.NORMAL,
         data: {
           materialId: event.data.materialId,
           queuePosition: 1,
@@ -200,11 +201,11 @@ export class NotificationEventListener {
   async handleFineCreated(event: FineEvent) {
     if (event.eventType === 'fine.created') {
       await this.queueService.addNotificationJob({
-        type: 'fine_created',
+        type: NotificationType.FINE_CREATED,
         userId: event.data.userId,
         title: 'Multa aplicada',
         message: `Multa de R$ ${event.data.amount.toFixed(2)} aplicada por ${event.data.daysOverdue} dias de atraso.`,
-        priority: 'high',
+        priority: JobPriority.HIGH,
         data: {
           fineId: event.data.fineId,
           amount: event.data.amount,
@@ -219,11 +220,11 @@ export class NotificationEventListener {
   async handleFinePaid(event: FineEvent) {
     if (event.eventType === 'fine.paid') {
       await this.queueService.addNotificationJob({
-        type: 'fine_paid',
+        type: NotificationType.FINE_PAID,
         userId: event.data.userId,
         title: 'Multa quitada',
         message: `Multa de R$ ${event.data.amount.toFixed(2)} foi paga com sucesso.`,
-        priority: 'normal',
+        priority: JobPriority.NORMAL,
         data: {
           fineId: event.data.fineId,
           amount: event.data.amount,
@@ -237,11 +238,11 @@ export class NotificationEventListener {
   async handleFineOverdue(event: FineEvent) {
     if (event.eventType === 'fine.overdue') {
       await this.queueService.addNotificationJob({
-        type: 'fine_overdue',
+        type: NotificationType.FINE_OVERDUE,
         userId: event.data.userId,
         title: 'Multa em atraso',
         message: `Sua multa está ${event.data.daysOverdue} dias em atraso. Juros aplicados.`,
-        priority: 'urgent',
+        priority: JobPriority.URGENT,
         data: {
           fineId: event.data.fineId,
           amount: event.data.amount,
@@ -260,11 +261,11 @@ export class NotificationEventListener {
     if (event.eventType === 'material.available') {
       // Notificar usuários com reservas ativas para este material
       await this.queueService.addNotificationJob({
-        type: 'material_available',
+        type: NotificationType.MATERIAL_AVAILABLE,
         userId: 'system', // Será processado para todos os usuários com reservas
         title: 'Material disponível',
         message: `O material "${event.data.title}" está disponível novamente.`,
-        priority: 'normal',
+        priority: JobPriority.NORMAL,
         data: {
           materialId: event.data.materialId,
           title: event.data.title,

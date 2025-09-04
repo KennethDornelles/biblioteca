@@ -6,6 +6,7 @@
   "private": true,
   "license": "MIT",
   "prisma": {
+    "schema": "src/database/schema.prisma",
     "seed": "ts-node src/database/seed.ts"
   },
   "scripts": {

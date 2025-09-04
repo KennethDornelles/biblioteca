@@ -31,6 +31,8 @@
 - [Exemplos de Autenticação](./backend/EXEMPLOS_AUTH.md) - Exemplos práticos de uso dos guards
 - [Implementação Auth Completa](./backend/IMPLEMENTACAO_AUTH_COMPLETA.md) - Resumo da implementação do módulo auth
 - [Sistema de Filas](./backend/SISTEMA_FILAS.md) - Sistema completo de filas assíncronas com Bull Queue
+- [Sistema de Notificações Avançadas](./backend/SISTEMA_NOTIFICACOES_AVANCADAS.md) - Sistema completo de notificações com templates, preferências e analytics
+- [Resumo Notificações Avançadas](./backend/RESUMO_NOTIFICACOES_AVANCADAS.md) - Resumo da implementação do sistema de notificações
 
 ### 🎨 **Frontend (Angular)**
 - [Status Frontend](./frontend/STATUS_FRONTEND.md) - Estado atual e funcionalidades
@@ -72,6 +74,7 @@
 | ⚙️ **Backend** | [Documentação Técnica](./backend/DOCUMENTACAO_TECNICA.md) | API, banco de dados e configurações |
 | 🔒 **Autenticação** | [Módulo Auth](./backend/MODULO_AUTH.md) | Sistema JWT e controle de acesso |
 | 🚀 **Sistema de Filas** | [Sistema de Filas](./backend/SISTEMA_FILAS.md) | Filas assíncronas e processamento em background |
+| 📢 **Notificações** | [Sistema de Notificações](./backend/SISTEMA_NOTIFICACOES_AVANCADAS.md) | Templates, preferências, push, analytics |
 | 🎨 **Frontend** | [Status Frontend](./frontend/STATUS_FRONTEND.md) | Interface e componentes |
 | 🗄️ **Banco** | [Estrutura Banco](./backend/ESTRUTURA_BANCO.md) | Schema e relacionamentos |
 | 🚀 **Setup** | [Configuração Inicial](./setup/CONFIGURACAO_INICIAL.md) | Primeiros passos e ambiente |
@@ -85,6 +88,7 @@
 - 🚧 **Frontend**: Em desenvolvimento ativo
 - 🗄️ **Banco**: Schema completo e migrações funcionais
 - ✅ **Segurança**: Autenticação JWT e autorização implementadas
+- ✅ **Notificações**: Sistema avançado com templates, preferências e analytics
 - 📚 **Documentação**: Em construção (este é o início!)
 
 ---

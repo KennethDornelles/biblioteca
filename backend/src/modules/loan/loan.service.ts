@@ -6,8 +6,9 @@ import { LoanResponseDto } from './dto/loan-response.dto';
 import { LoanReturnDto } from './dto/loan-return.dto';
 import { LoanRenewalDto } from './dto/loan-renewal.dto';
 import { EventBusService, EventFactoryService } from '../../events';
-import { LoanStatus } from '../../enums';
+import { LoanStatus, MaterialStatus } from '../../enums';
 import { addDays } from 'date-fns';
+import { LOAN_STATUS_LABELS, LOAN_STATUS_COLORS, LOAN_STATUS_ICONS } from '../../enums/loan-status.enum';
 
 @Injectable()
 export class LoanService {
@@ -64,7 +65,7 @@ export class LoanService {
     // Atualizar status do material para emprestado
     await this.prisma.material.update({
       where: { id: createLoanDto.materialId },
-      data: { status: 'BORROWED' }
+      data: { status: MaterialStatus.LOANED }
     });
 
     // Disparar evento de empréstimo criado
@@ -219,9 +220,11 @@ export class LoanService {
     // Atualizar empréstimo
     const updatedLoan = await this.prisma.loan.update({
       where: { id },
-      data: {
+            data: {
         dueDate: newDueDate,
-        renewalCount,
+        renewalCount: {
+          increment: 1,
+        },
         observations: renewalDto.observations,
       },
       include: {
@@ -269,6 +272,10 @@ export class LoanService {
   }
 
   private mapToResponseDto(loan: any): LoanResponseDto {
+    const isOverdue = loan.returnDate ? loan.returnDate > loan.dueDate : new Date() > loan.dueDate && loan.status === LoanStatus.ACTIVE;
+    const daysOverdue = isOverdue ? Math.ceil(Math.abs((loan.returnDate || new Date()).getTime() - loan.dueDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+    const canRenew = loan.status === LoanStatus.ACTIVE && loan.renewalCount < loan.maxRenewals && !isOverdue;
+
     return {
       id: loan.id,
       userId: loan.userId,
@@ -281,6 +288,13 @@ export class LoanService {
       observations: loan.observations,
       createdAt: loan.createdAt,
       updatedAt: loan.updatedAt,
+      maxRenewals: loan.maxRenewals,
+      statusLabel: LOAN_STATUS_LABELS[loan.status],
+      statusColor: LOAN_STATUS_COLORS[loan.status],
+      statusIcon: LOAN_STATUS_ICONS[loan.status],
+      isOverdue: isOverdue,
+      daysOverdue: daysOverdue,
+      canRenew: canRenew,
       user: loan.user ? {
         id: loan.user.id,
         name: loan.user.name,

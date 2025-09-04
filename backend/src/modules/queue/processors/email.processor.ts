@@ -96,8 +96,7 @@ export class EmailProcessor {
     try {
       const messageId = await this.emailService.sendWelcomeEmail(
         data.to,
-        data.context.userName,
-        data.context.verificationUrl
+        data.context
       );
 
       return {
@@ -116,10 +115,7 @@ export class EmailProcessor {
     try {
       const messageId = await this.emailService.sendLoanReminderEmail(
         data.to,
-        data.context.userName,
-        data.context.materialTitle,
-        data.context.dueDate,
-        data.context.renewalUrl
+        data.context
       );
 
       return {
@@ -138,11 +134,7 @@ export class EmailProcessor {
     try {
       const messageId = await this.emailService.sendOverdueNoticeEmail(
         data.to,
-        data.context.userName,
-        data.context.materialTitle,
-        data.context.daysOverdue,
-        data.context.fineAmount,
-        data.context.paymentUrl
+        data.context
       );
 
       return {
@@ -161,10 +153,7 @@ export class EmailProcessor {
     try {
       const messageId = await this.emailService.sendReservationAvailableEmail(
         data.to,
-        data.context.userName,
-        data.context.materialTitle,
-        data.context.pickupDeadline,
-        data.context.pickupLocation
+        data.context
       );
 
       return {
@@ -183,11 +172,7 @@ export class EmailProcessor {
     try {
       const messageId = await this.emailService.sendFineNoticeEmail(
         data.to,
-        data.context.userName,
-        data.context.fineAmount,
-        data.context.reason,
-        data.context.paymentUrl,
-        data.context.appealUrl
+        data.context
       );
 
       return {
@@ -206,9 +191,7 @@ export class EmailProcessor {
     try {
       const messageId = await this.emailService.sendPasswordResetEmail(
         data.to,
-        data.context.userName,
-        data.context.resetUrl,
-        data.context.expiresAt
+        data.context
       );
 
       return {
@@ -227,9 +210,7 @@ export class EmailProcessor {
     try {
       const messageId = await this.emailService.sendAccountVerificationEmail(
         data.to,
-        data.context.userName,
-        data.context.verificationUrl,
-        data.context.expiresAt
+        data.context
       );
 
       return {
@@ -248,10 +229,7 @@ export class EmailProcessor {
     try {
       const messageId = await this.emailService.sendSystemNotificationEmail(
         data.to,
-        data.context.title,
-        data.context.message,
-        data.context.actionUrl,
-        data.context.actionText
+        data.context
       );
 
       return {

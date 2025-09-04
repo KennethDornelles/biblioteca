@@ -1,10 +1,11 @@
 // ==================== ENUMS ====================
 
 export enum JobPriority {
-  LOW = 1,
-  NORMAL = 2,
-  HIGH = 3,
-  CRITICAL = 4,
+  LOW = 'low',
+  NORMAL = 'normal',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+  URGENT = 'urgent',
 }
 
 export enum JobStatus {
@@ -27,6 +28,14 @@ export enum EmailType {
   PASSWORD_RESET = 'password_reset',
   ACCOUNT_VERIFICATION = 'account_verification',
   SYSTEM_NOTIFICATION = 'system_notification',
+  PASSWORD_CHANGED = 'password_changed',
+  LOAN_CONFIRMATION = 'loan_confirmation',
+  LOAN_OVERDUE = 'loan_overdue',
+  RESERVATION_CONFIRMATION = 'reservation_confirmation',
+  RESERVATION_FULFILLED = 'reservation_fulfilled',
+  RESERVATION_REMINDER = 'reservation_reminder',
+  FINE_NOTIFICATION = 'fine_notification',
+  FINE_OVERDUE = 'fine_overdue',
 }
 
 export enum NotificationType {
@@ -34,6 +43,19 @@ export enum NotificationType {
   SMS = 'sms',
   IN_APP = 'in_app',
   WEBHOOK = 'webhook',
+  LOGIN_SUCCESS = 'login_success',
+  LOAN_CREATED = 'loan_created',
+  LOAN_REMINDER = 'loan_reminder',
+  LOAN_OVERDUE = 'loan_overdue',
+  LOAN_RETURNED = 'loan_returned',
+  RESERVATION_CREATED = 'reservation_created',
+  RESERVATION_FULFILLED = 'reservation_fulfilled',
+  RESERVATION_REMINDER = 'reservation_reminder',
+  QUEUE_POSITION_UPDATED = 'queue_position_updated',
+  FINE_CREATED = 'fine_created',
+  FINE_PAID = 'fine_paid',
+  FINE_OVERDUE = 'fine_overdue',
+  MATERIAL_AVAILABLE = 'material_available',
 }
 
 export enum ReportType {
@@ -44,6 +66,7 @@ export enum ReportType {
   MATERIAL_USAGE = 'material_usage',
   FINANCIAL_REPORT = 'financial_report',
   INVENTORY_REPORT = 'inventory_report',
+  AUDIT_LOG = 'audit_log',
 }
 
 export enum MaintenanceType {

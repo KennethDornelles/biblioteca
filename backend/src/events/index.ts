@@ -5,7 +5,8 @@ export * from './events.module';
 export * from './interfaces';
 
 // Decorators
-export * from './decorators';
+export { EventHandler } from './decorators/event-handler.decorator';
+export { PublishEvent } from './decorators/publish-event.decorator';
 
 // Services
 export * from './services';

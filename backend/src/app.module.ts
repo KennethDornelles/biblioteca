@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
@@ -11,9 +12,14 @@ import { SystemConfigurationModule } from './modules/system-configuration/system
 import { AuthModule } from './modules/auth/auth.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { EventsModule } from './events/events.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     EventsModule, // Módulo de eventos deve ser importado primeiro
     AuthModule, 
     UserModule, 
@@ -23,7 +29,8 @@ import { EventsModule } from './events/events.module';
     FineModule, 
     ReviewModule, 
     SystemConfigurationModule,
-    QueueModule
+    QueueModule,
+    NotificationModule
   ],
   controllers: [AppController],
   providers: [AppService],

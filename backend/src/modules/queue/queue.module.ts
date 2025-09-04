@@ -8,9 +8,17 @@ import { EmailProcessor } from './processors/email.processor';
 import { NotificationProcessor } from './processors/notification.processor';
 import { ReportProcessor } from './processors/report.processor';
 import { MaintenanceProcessor } from './processors/maintenance.processor';
+import { EmailModule } from '../email/email.module';
+import { NotificationModule } from '../notification/notification.module';
+import { ReportModule } from '../report/report.module';
+import { MaintenanceModule } from '../maintenance/maintenance.module';
 
 @Module({
   imports: [
+    EmailModule,
+    NotificationModule,
+    ReportModule,
+    MaintenanceModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

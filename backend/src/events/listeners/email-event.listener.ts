@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { QueueService } from '../../modules/queue/queue.service';
-import { 
+import { EmailType } from '../../modules/queue/interfaces/queue.interfaces';
+import type { 
   UserEvent, 
   LoanEvent, 
   ReservationEvent, 
@@ -25,11 +26,11 @@ export class EmailEventListener {
   async handleUserCreated(event: UserEvent) {
     if (event.eventType === 'user.created') {
       await this.queueService.addEmailJob({
-        type: 'welcome',
+        type: EmailType.WELCOME,
         to: event.data.email,
         subject: 'Bem-vindo à Biblioteca Universitária',
         template: 'welcome',
-        data: {
+        context: {
           name: event.data.name,
           userType: event.data.userType,
         },
@@ -41,11 +42,11 @@ export class EmailEventListener {
   async handleUserPasswordChanged(event: UserEvent) {
     if (event.eventType === 'user.password_changed') {
       await this.queueService.addEmailJob({
-        type: 'password_changed',
+        type: EmailType.PASSWORD_CHANGED,
         to: event.data.email,
         subject: 'Senha alterada com sucesso',
         template: 'password_changed',
-        data: {
+        context: {
           name: event.data.email,
           changedBy: event.data.changedBy,
           isSelfChange: event.data.isSelfChange,
@@ -61,11 +62,11 @@ export class EmailEventListener {
   async handleLoanCreated(event: LoanEvent) {
     if (event.eventType === 'loan.created') {
       await this.queueService.addEmailJob({
-        type: 'loan_confirmation',
+        type: EmailType.LOAN_CONFIRMATION,
         to: event.data.userId, // Assumindo que userId é o email ou será resolvido
         subject: 'Empréstimo confirmado',
         template: 'loan_confirmation',
-        data: {
+        context: {
           loanId: event.data.loanId,
           materialId: event.data.materialId,
           dueDate: event.data.dueDate,
@@ -78,11 +79,11 @@ export class EmailEventListener {
   async handleLoanExpiringSoon(event: LoanEvent) {
     if (event.eventType === 'loan.expiring_soon') {
       await this.queueService.addEmailJob({
-        type: 'loan_reminder',
+        type: EmailType.LOAN_REMINDER,
         to: event.data.userId,
         subject: 'Lembrete: Empréstimo vence em breve',
         template: 'loan_reminder',
-        data: {
+        context: {
           loanId: event.data.loanId,
           materialId: event.data.materialId,
           dueDate: event.data.dueDate,
@@ -96,11 +97,11 @@ export class EmailEventListener {
   async handleLoanOverdue(event: LoanEvent) {
     if (event.eventType === 'loan.overdue') {
       await this.queueService.addEmailJob({
-        type: 'loan_overdue',
+        type: EmailType.LOAN_OVERDUE,
         to: event.data.userId,
         subject: 'Empréstimo em atraso',
         template: 'loan_overdue',
-        data: {
+        context: {
           loanId: event.data.loanId,
           materialId: event.data.materialId,
           dueDate: event.data.dueDate,
@@ -118,11 +119,11 @@ export class EmailEventListener {
   async handleReservationCreated(event: ReservationEvent) {
     if (event.eventType === 'reservation.created') {
       await this.queueService.addEmailJob({
-        type: 'reservation_confirmation',
+        type: EmailType.RESERVATION_CONFIRMATION,
         to: event.data.userId,
         subject: 'Reserva confirmada',
         template: 'reservation_confirmation',
-        data: {
+        context: {
           reservationId: event.data.reservationId,
           materialId: event.data.materialId,
           expirationDate: event.data.expirationDate,
@@ -136,11 +137,11 @@ export class EmailEventListener {
   async handleReservationFulfilled(event: ReservationEvent) {
     if (event.eventType === 'reservation.fulfilled') {
       await this.queueService.addEmailJob({
-        type: 'reservation_fulfilled',
+        type: EmailType.RESERVATION_FULFILLED,
         to: event.data.userId,
         subject: 'Reserva disponível para retirada',
         template: 'reservation_fulfilled',
-        data: {
+        context: {
           reservationId: event.data.reservationId,
           materialId: event.data.materialId,
           fulfillmentDate: event.data.fulfillmentDate,
@@ -153,11 +154,11 @@ export class EmailEventListener {
   async handleReservationExpiringSoon(event: ReservationEvent) {
     if (event.eventType === 'reservation.expiring_soon') {
       await this.queueService.addEmailJob({
-        type: 'reservation_reminder',
+        type: EmailType.RESERVATION_REMINDER,
         to: event.data.userId,
         subject: 'Reserva expira em breve',
         template: 'reservation_reminder',
-        data: {
+        context: {
           reservationId: event.data.reservationId,
           materialId: event.data.materialId,
           expirationDate: event.data.expirationDate,
@@ -174,11 +175,11 @@ export class EmailEventListener {
   async handleFineCreated(event: FineEvent) {
     if (event.eventType === 'fine.created') {
       await this.queueService.addEmailJob({
-        type: 'fine_notification',
+        type: EmailType.FINE_NOTIFICATION,
         to: event.data.userId,
         subject: 'Multa aplicada',
         template: 'fine_notification',
-        data: {
+        context: {
           fineId: event.data.fineId,
           amount: event.data.amount,
           daysOverdue: event.data.daysOverdue,
@@ -192,11 +193,11 @@ export class EmailEventListener {
   async handleFineOverdue(event: FineEvent) {
     if (event.eventType === 'fine.overdue') {
       await this.queueService.addEmailJob({
-        type: 'fine_overdue',
+        type: EmailType.FINE_OVERDUE,
         to: event.data.userId,
         subject: 'Multa em atraso',
         template: 'fine_overdue',
-        data: {
+        context: {
           fineId: event.data.fineId,
           amount: event.data.amount,
           daysOverdue: event.data.daysOverdue,

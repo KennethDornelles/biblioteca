@@ -30,7 +30,7 @@ export class QueueService {
   }): Promise<Job<EmailJobData>> {
     try {
       const job = await this.emailQueue.add('send-email', data, {
-        priority: options?.priority || JobPriority.NORMAL,
+        priority: this.getPriorityValue(options?.priority || JobPriority.NORMAL),
         delay: options?.delay || 0,
         attempts: options?.attempts || 3,
         removeOnComplete: 100,
@@ -69,7 +69,7 @@ export class QueueService {
   }): Promise<Job<NotificationJobData>> {
     try {
       const job = await this.notificationQueue.add('send-notification', data, {
-        priority: options?.priority || JobPriority.NORMAL,
+        priority: this.getPriorityValue(options?.priority || JobPriority.NORMAL),
         delay: options?.delay || 0,
         attempts: options?.attempts || 3,
         removeOnComplete: 100,
@@ -108,7 +108,7 @@ export class QueueService {
   }): Promise<Job<ReportJobData>> {
     try {
       const job = await this.reportQueue.add('generate-report', data, {
-        priority: options?.priority || JobPriority.LOW,
+        priority: this.getPriorityValue(options?.priority || JobPriority.LOW),
         delay: options?.delay || 0,
         attempts: options?.attempts || 3,
         removeOnComplete: 50,
@@ -147,7 +147,7 @@ export class QueueService {
   }): Promise<Job<MaintenanceJobData>> {
     try {
       const job = await this.maintenanceQueue.add('perform-maintenance', data, {
-        priority: options?.priority || JobPriority.LOW,
+        priority: this.getPriorityValue(options?.priority || JobPriority.LOW),
         delay: options?.delay || 0,
         attempts: options?.attempts || 3,
         removeOnComplete: 50,
@@ -255,6 +255,23 @@ export class QueueService {
 
   // ==================== UTILITY METHODS ====================
   
+  private getPriorityValue(priority: JobPriority): number {
+    switch (priority) {
+      case JobPriority.URGENT:
+        return 1;
+      case JobPriority.CRITICAL:
+        return 2;
+      case JobPriority.HIGH:
+        return 3;
+      case JobPriority.NORMAL:
+        return 4;
+      case JobPriority.LOW:
+        return 5;
+      default:
+        return 4; // Default to normal
+    }
+  }
+
   private mapJobStateToStatus(state: string): JobStatus {
     switch (state) {
       case 'active':

@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaClient } from '@prisma/client';
-import { EventBusService, EventFactoryService } from './event-bus.service';
+import { EventBusService } from './event-bus.service';
+import { EventFactoryService } from './event-factory.service';
 import { LoanStatus } from '../../enums';
 import { differenceInDays, addDays } from 'date-fns';
 
@@ -140,7 +141,7 @@ export class LoanSchedulerService {
       const tomorrow = addDays(new Date(), 1);
       const dayAfterTomorrow = addDays(new Date(), 2);
       
-      // Buscar reservas que expiram em 1 ou 2 dias
+      // Buscar reservas que vencem em 1 ou 2 dias
       const expiringReservations = await this.prisma.reservation.findMany({
         where: {
           status: 'ACTIVE',

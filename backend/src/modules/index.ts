@@ -18,3 +18,9 @@ export * from './review';
 
 // Módulo de Configuração do Sistema
 export * from './system-configuration';
+
+// Módulo de Autenticação
+export * from './auth';
+
+// Módulo de Email
+export * from './email';
