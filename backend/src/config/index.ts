@@ -25,3 +25,9 @@ export {
 
 // Configurações de autenticação
 export { AUTH_CONFIG } from './auth.config';
+
+// Configurações de ambiente e segurança
+export * from './environment.config';
+export * from './logger.config';
+export * from './swagger.config';
+export * from './throttler.config';

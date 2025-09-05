@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
@@ -13,12 +14,37 @@ import { AuthModule } from './modules/auth/auth.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { EventsModule } from './events/events.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { validateEnvironment, EnvironmentVariables } from './config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env.local', '.env'],
+      validate: validateEnvironment,
+      cache: true,
+      expandVariables: true,
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService<EnvironmentVariables>) => [
+        {
+          name: 'short',
+          ttl: 1000, // 1 second
+          limit: 10, // 10 requests per second
+        },
+        {
+          name: 'medium',
+          ttl: 60000, // 1 minute
+          limit: 100, // 100 requests per minute
+        },
+        {
+          name: 'long',
+          ttl: configService.get('RATE_LIMIT_WINDOW_MS') || 900000,
+          limit: configService.get('RATE_LIMIT_MAX_REQUESTS') || 100,
+        },
+      ],
     }),
     EventsModule, // Módulo de eventos deve ser importado primeiro
     AuthModule, 
