@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: biblioteca-postgres
+    env_file:
+      - docker.env
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - biblioteca-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: biblioteca-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - biblioteca-network
+    restart: unless-stopped
+
+  api:
+    container_name: biblioteca-api
+    env_file:
+      - docker.env
+    networks:
+      - biblioteca-network
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: biblioteca-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@biblioteca.edu.br
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - biblioteca-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:
+
+networks:
+  biblioteca-network:
+    driver: bridge

@@ -1,0 +1,542 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../../node_modules/.prisma/client"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String        @id @default(cuid())
+  name               String        @db.VarChar(255)
+  email              String        @unique @db.VarChar(255)
+  phone              String?       @db.VarChar(20)
+  password           String        @db.VarChar(255)
+  registrationDate   DateTime      @default(now())
+  type               UserType
+  active             Boolean       @default(true)
+  registrationNumber String?       @unique @db.VarChar(20)
+  course             String?       @db.VarChar(255)
+  level              StudentLevel?
+  department         String?       @db.VarChar(255)
+  title              String?       @db.VarChar(100)
+  admissionDate      DateTime?
+  loanLimit          Int           @default(3)
+  loanDays           Int           @default(7)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  fines              Fine[]
+  loansMade          Loan[]        @relation("LibrarianLoan")
+  loans              Loan[]
+  reservations       Reservation[]
+  reviews            Review[]
+  notifications      Notification[]
+  notificationPreferences UserNotificationPreferences?
+  deviceTokens       DeviceToken[]
+
+  @@index([email])
+  @@index([registrationNumber])
+  @@index([type])
+  @@map("users")
+}
+
+model Material {
+  id               String         @id @default(cuid())
+  title            String         @db.VarChar(500)
+  author           String         @db.VarChar(255)
+  isbn             String?        @unique @db.VarChar(20)
+  issn             String?        @db.VarChar(20)
+  publisher        String?        @db.VarChar(255)
+  publicationYear  Int?
+  edition          String?        @db.VarChar(50)
+  category         String         @db.VarChar(100)
+  subcategory      String?        @db.VarChar(100)
+  location         String         @db.VarChar(50)
+  status           MaterialStatus @default(AVAILABLE)
+  type             MaterialType   @default(BOOK)
+  numberOfPages    Int?
+  language         String         @default("Português") @db.VarChar(50)
+  description      String?
+  keywords         String?
+  assetNumber      String?        @unique @db.VarChar(20)
+  acquisitionValue Decimal?       @db.Decimal(10, 2)
+  acquisitionDate  DateTime?
+  supplier         String?        @db.VarChar(255)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  loans            Loan[]
+  reservations     Reservation[]
+  reviews          Review[]
+
+  @@index([title])
+  @@index([author])
+  @@index([isbn])
+  @@index([category])
+  @@index([status])
+  @@map("materials")
+}
+
+model Loan {
+  id           String     @id @default(cuid())
+  userId       String
+  materialId   String
+  librarianId  String?
+  loanDate     DateTime   @default(now())
+  dueDate      DateTime
+  returnDate   DateTime?
+  renewalDate  DateTime?
+  status       LoanStatus @default(ACTIVE)
+  renewalCount     Int        @default(0)
+  maxRenewals  Int        @default(2)
+  observations String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  fines        Fine[]
+  librarian    User?      @relation("LibrarianLoan", fields: [librarianId], references: [id])
+  material     Material   @relation(fields: [materialId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([materialId])
+  @@index([status])
+  @@index([loanDate])
+  @@index([dueDate])
+  @@map("loans")
+}
+
+model Reservation {
+  id              String            @id @default(cuid())
+  userId          String
+  materialId      String
+  reservationDate DateTime          @default(now())
+  expirationDate  DateTime
+  status          ReservationStatus @default(ACTIVE)
+  priority        Int               @default(1)
+  observations    String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  material        Material          @relation(fields: [materialId], references: [id])
+  user            User              @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([materialId])
+  @@index([status])
+  @@index([expirationDate])
+  @@map("reservations")
+}
+
+model Fine {
+  id           String     @id @default(cuid())
+  loanId       String
+  userId       String
+  amount       Decimal    @db.Decimal(10, 2)
+  daysOverdue  Int
+  creationDate DateTime   @default(now())
+  dueDate      DateTime
+  paymentDate  DateTime?
+  status       FineStatus @default(PENDING)
+  description  String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  loan         Loan       @relation(fields: [loanId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("fines")
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  userId     String
+  materialId String
+  rating     Int      @db.SmallInt
+  comment    String?
+  reviewDate DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  material   Material @relation(fields: [materialId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, materialId])
+  @@index([materialId])
+  @@index([rating])
+  @@map("reviews")
+}
+
+model SystemConfiguration {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  type        String   @db.VarChar(50)
+  category    String   @db.VarChar(100)
+  editable    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@map("system_configurations")
+}
+
+model Notification {
+  id              String             @id @default(cuid())
+  userId          String
+  title           String             @db.VarChar(255)
+  message         String             @db.Text
+  type            NotificationType
+  category        NotificationCategory
+  priority        NotificationPriority @default(MEDIUM)
+  status          NotificationStatus @default(PENDING)
+  channel         NotificationChannel
+  templateId      String?
+  data            Json?
+  scheduledFor    DateTime?
+  sentAt          DateTime?
+  readAt          DateTime?
+  expiresAt       DateTime?
+  retryCount      Int                @default(0)
+  maxRetries      Int                @default(3)
+  errorMessage    String?
+  deliveryStatus  DeliveryStatus     @default(PENDING)
+  metadata        Json?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  user            User               @relation(fields: [userId], references: [id])
+  template        NotificationTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+  @@index([category])
+  @@index([status])
+  @@index([channel])
+  @@index([scheduledFor])
+  @@index([sentAt])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model NotificationTemplate {
+  id          String             @id @default(cuid())
+  name        String             @unique @db.VarChar(100)
+  title       String             @db.VarChar(255)
+  message     String             @db.Text
+  type        NotificationType
+  category    NotificationCategory
+  channel     NotificationChannel
+  variables   String[]           // Array de variáveis disponíveis no template
+  isActive    Boolean            @default(true)
+  isSystem    Boolean            @default(false)
+  metadata    Json?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  notifications Notification[]
+  campaigns   NotificationCampaign[]
+
+  @@index([type])
+  @@index([category])
+  @@index([channel])
+  @@index([isActive])
+  @@map("notification_templates")
+}
+
+model UserNotificationPreferences {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  emailEnabled          Boolean  @default(true)
+  smsEnabled            Boolean  @default(false)
+  pushEnabled           Boolean  @default(true)
+  inAppEnabled          Boolean  @default(true)
+  webhookEnabled        Boolean  @default(false)
+  webhookUrl            String?
+  quietHoursStart       String?  @db.VarChar(5) // HH:MM format
+  quietHoursEnd         String?  @db.VarChar(5) // HH:MM format
+  timezone              String   @default("America/Sao_Paulo") @db.VarChar(50)
+  language              String   @default("pt-BR") @db.VarChar(10)
+  categories            Json     // Preferências por categoria
+  channels              Json     // Preferências por canal
+  frequency             NotificationFrequency @default(IMMEDIATE)
+  digestEnabled         Boolean  @default(false)
+  digestFrequency       DigestFrequency @default(DAILY)
+  digestTime            String   @default("09:00") @db.VarChar(5)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id])
+
+  @@map("user_notification_preferences")
+}
+
+model NotificationCampaign {
+  id              String                @id @default(cuid())
+  name            String                @db.VarChar(255)
+  description     String?
+  type            NotificationType
+  category        NotificationCategory
+  channel         NotificationChannel
+  templateId      String?
+  targetUsers     Json                  // Critérios para seleção de usuários
+  scheduledFor    DateTime?
+  status          CampaignStatus        @default(DRAFT)
+  totalRecipients Int                   @default(0)
+  sentCount       Int                   @default(0)
+  failedCount     Int                   @default(0)
+  openedCount     Int                   @default(0)
+  clickedCount    Int                   @default(0)
+  metadata        Json?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  template        NotificationTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([type])
+  @@index([category])
+  @@index([status])
+  @@index([scheduledFor])
+  @@map("notification_campaigns")
+}
+
+model NotificationAnalytics {
+  id                String   @id @default(cuid())
+  notificationId    String?
+  campaignId        String?
+  userId            String
+  event             AnalyticsEvent
+  timestamp         DateTime @default(now())
+  metadata          Json?
+  userAgent         String?
+  ipAddress         String?
+  deviceType        String?
+  browser           String?
+  os                String?
+
+  @@index([notificationId])
+  @@index([campaignId])
+  @@index([userId])
+  @@index([event])
+  @@index([timestamp])
+  @@map("notification_analytics")
+}
+
+model DeviceToken {
+  id        String         @id @default(cuid())
+  userId    String
+  token     String         @unique
+  platform  DevicePlatform
+  isActive  Boolean        @default(true)
+  lastUsed  DateTime       @default(now())
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("device_tokens")
+}
+
+enum UserType {
+  STUDENT
+  PROFESSOR
+  LIBRARIAN
+  ADMIN
+  STAFF
+
+  @@map("user_type")
+}
+
+enum StudentLevel {
+  UNDERGRADUATE
+  POSTGRADUATE
+  MASTERS
+  DOCTORATE
+  TECHNICAL
+
+  @@map("student_level")
+}
+
+enum MaterialStatus {
+  AVAILABLE
+  LOANED
+  RESERVED
+  MAINTENANCE
+  LOST
+  DECOMMISSIONED
+
+  @@map("material_status")
+}
+
+enum MaterialType {
+  BOOK
+  MAGAZINE
+  JOURNAL
+  DVD
+  CD
+  THESIS
+  DISSERTATION
+  MONOGRAPH
+  ARTICLE
+  MAP
+  OTHER
+
+  @@map("material_type")
+}
+
+enum LoanStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+  RENEWED
+  CANCELLED
+
+  @@map("loan_status")
+}
+
+enum ReservationStatus {
+  ACTIVE
+  FULFILLED
+  EXPIRED
+  CANCELLED
+
+  @@map("reservation_status")
+}
+
+enum FineStatus {
+  PENDING
+  PAID
+  CANCELLED
+  INSTALLMENT
+
+  @@map("fine_status")
+}
+
+enum NotificationType {
+  SYSTEM
+  LOAN
+  RESERVATION
+  FINE
+  SECURITY
+  MAINTENANCE
+  MARKETING
+  REMINDER
+  ALERT
+  WELCOME
+  PASSWORD_RESET
+  ACCOUNT_VERIFICATION
+  CUSTOM
+
+  @@map("notification_type")
+}
+
+enum NotificationCategory {
+  URGENT
+  IMPORTANT
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+  PROMOTIONAL
+  SECURITY
+
+  @@map("notification_category")
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+  CRITICAL
+
+  @@map("notification_priority")
+}
+
+enum NotificationStatus {
+  PENDING
+  SCHEDULED
+  SENDING
+  SENT
+  DELIVERED
+  FAILED
+  CANCELLED
+  EXPIRED
+
+  @@map("notification_status")
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+  WEBHOOK
+  SLACK
+  TEAMS
+  DISCORD
+
+  @@map("notification_channel")
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  FAILED
+  BOUNCED
+  UNSUBSCRIBED
+
+  @@map("delivery_status")
+}
+
+enum NotificationFrequency {
+  IMMEDIATE
+  HOURLY
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+
+  @@map("notification_frequency")
+}
+
+enum DigestFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+
+  @@map("digest_frequency")
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  PAUSED
+  COMPLETED
+  CANCELLED
+  FAILED
+
+  @@map("campaign_status")
+}
+
+enum AnalyticsEvent {
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  FAILED
+  BOUNCED
+  UNSUBSCRIBED
+  COMPLAINED
+
+  @@map("analytics_event")
+}
+
+enum DevicePlatform {
+  IOS
+  ANDROID
+  WEB
+}

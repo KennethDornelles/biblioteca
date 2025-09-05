@@ -1,0 +1,16 @@
+FROM node:18-alpine
+
+# Instalar dependências do sistema necessárias para Prisma
+RUN apk add --no-cache openssl libc6-compat
+
+WORKDIR /app
+
+# Instalar todas as dependências (incluindo devDependencies)
+COPY package*.json ./
+RUN npm ci
+
+# Copiar o restante da aplicação
+COPY . .
+
+# O comando será sobrescrito pelo docker-compose, mas é bom ter um padrão.
+CMD ["npm", "run", "start:dev"]
