@@ -53,6 +53,11 @@ export class EnvironmentVariables {
   @Transform(({ value }) => parseInt(value, 10))
   PASSWORD_MIN_LENGTH: number = 8;
 
+  // Cookie Security
+  @IsString()
+  @IsOptional()
+  COOKIE_SECRET?: string;
+
   // CORS
   @IsString()
   CORS_ORIGIN: string = 'http://localhost:3000,http://localhost:4200';

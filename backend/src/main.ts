@@ -1,156 +1,80 @@
 import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { ValidationPipe, Logger } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { useContainer } from 'class-validator';
+import { AppModule } from './app.module';
 import helmet from 'helmet';
 import compression from 'compression';
-import morgan from 'morgan';
-import { AppModule } from './app.module';
-import { 
-  EnvironmentVariables, 
-  createLogger, 
-  setupSwagger 
-} from './config';
-import { SecurityHeadersInterceptor } from './interceptors';
+import cookieParser from 'cookie-parser';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { setupSwagger } from './config/swagger.config';
+import { EnvironmentVariables } from './config/environment.config';
 
 async function bootstrap() {
-  // Create logger first for early error logging
-  const tempLogger = new Logger('Bootstrap');
+  const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
   
-  try {
-    // Create application with logger
-    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-      bufferLogs: true,
-    });
-
-    // Get configuration service
-    const configService = app.get<ConfigService<EnvironmentVariables>>(ConfigService);
-    const config = configService.get<EnvironmentVariables>('', { infer: true })!;
-    
-    // Setup structured logging
-    const logger = createLogger(config);
-    app.useLogger(logger);
-    
-    // Trust proxy (important for rate limiting and real IP detection)
-    app.set('trust proxy', 1);
-
-    // Security middlewares
-    app.use(helmet({
-      contentSecurityPolicy: config.NODE_ENV === 'production' ? undefined : false,
-      crossOriginEmbedderPolicy: false,
-    }));
-
-    // HTTP request logging
-    const morganFormat = config.NODE_ENV === 'production' 
-      ? 'combined' 
-      : 'dev';
-    
-    app.use(morgan(morganFormat, {
-      stream: {
-        write: (message: string) => {
-          logger.log(message.trim(), 'HTTP');
-        },
+  // Configurações de segurança - Helmet
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
       },
-    }));
+    },
+    crossOriginEmbedderPolicy: false, // Permite embeds para Swagger
+  }));
+  
+  // Compressão gzip para otimizar respostas
+  app.use(compression());
+  
+  // Cookie Parser para manipulação segura de cookies
+  app.use(cookieParser(configService.get('COOKIE_SECRET') || 'biblioteca-secret-key'));
+  
+  // Validation Pipe global para validação automática de DTOs
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true, // Remove propriedades não definidas nos DTOs
+    forbidNonWhitelisted: true, // Rejeita requests com propriedades extras
+    transform: true, // Transforma tipos automaticamente
+    disableErrorMessages: process.env.NODE_ENV === 'production', // Remove mensagens detalhadas em produção
+  }));
+  
+  // CORS avançado com configurações de segurança
+  app.enableCors({
+    origin: process.env.NODE_ENV === 'production' 
+      ? ['https://biblioteca-universitaria.com'] // Domínios permitidos em produção
+      : ['http://localhost:3000', 'http://localhost:4200'], // Domínios para desenvolvimento
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    credentials: true, // Permite cookies e headers de autenticação
+    maxAge: 86400, // Cache preflight por 24 horas
+  });
 
-    // Compression middleware
-    app.use(compression());
+  // Configuração do Swagger para documentação da API
+  const envConfig = configService.get<EnvironmentVariables>('') as EnvironmentVariables;
+  setupSwagger(app, envConfig || {
+    NODE_ENV: configService.get('NODE_ENV') || 'development',
+    SWAGGER_TITLE: configService.get('SWAGGER_TITLE') || 'Biblioteca Universitária API',
+    SWAGGER_DESCRIPTION: configService.get('SWAGGER_DESCRIPTION') || 'API para gerenciamento de biblioteca universitária',
+    SWAGGER_VERSION: configService.get('SWAGGER_VERSION') || '1.0.0',
+    SWAGGER_PATH: configService.get('SWAGGER_PATH') || 'api-docs',
+    APP_URL: configService.get('APP_URL') || 'http://localhost:3001',
+  } as EnvironmentVariables);
 
-    // CORS configuration
-    const corsOrigins = config.CORS_ORIGIN.split(',').map(origin => origin.trim());
-    app.enableCors({
-      origin: corsOrigins,
-      credentials: config.CORS_CREDENTIALS,
-      methods: config.CORS_METHODS.split(',').map(method => method.trim()),
-      allowedHeaders: [
-        'Accept',
-        'Authorization',
-        'Content-Type',
-        'X-Requested-With',
-        'Range',
-      ],
-      exposedHeaders: [
-        'Content-Range',
-        'X-Content-Range',
-        'X-Total-Count',
-      ],
-    });
-
-    // Global validation pipe with security settings
-    app.useGlobalPipes(
-      new ValidationPipe({
-        // Security: Strip unknown properties to prevent mass assignment
-        whitelist: true,
-        // Security: Throw error if non-whitelisted properties are present
-        forbidNonWhitelisted: true,
-        // Security: Reject unknown values
-        forbidUnknownValues: true,
-        // Transform payloads to be objects typed according to their DTO classes
-        transform: true,
-        // Automatically transform primitive types
-        transformOptions: {
-          enableImplicitConversion: true,
-        },
-        // Detailed error messages in development only
-        disableErrorMessages: config.NODE_ENV === 'production',
-        // Validate nested objects
-        validateCustomDecorators: true,
-      }),
-    );
-
-    // Enable dependency injection for class-validator
-    useContainer(app.select(AppModule), { fallbackOnErrors: true });
-
-    // Global security interceptor
-    app.useGlobalInterceptors(new SecurityHeadersInterceptor());
-
-    // Setup API documentation (disabled in production)
-    setupSwagger(app, config);
-
-    // Graceful shutdown handling
-    const gracefulShutdown = (signal: string) => {
-      logger.log(`Received ${signal}, starting graceful shutdown...`, 'Application');
-      
-      // Close server
-      app.close().then(() => {
-        logger.log('HTTP server closed', 'Application');
-        process.exit(0);
-      }).catch((error) => {
-        logger.error('Error during graceful shutdown', error, 'Application');
-        process.exit(1);
-      });
-    };
-
-    // Register signal handlers
-    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-
-    // Handle uncaught exceptions
-    process.on('uncaughtException', (error) => {
-      logger.error('Uncaught Exception:', error, 'Application');
-      gracefulShutdown('uncaughtException');
-    });
-
-    // Handle unhandled promise rejections
-    process.on('unhandledRejection', (reason, promise) => {
-      logger.error('Unhandled Rejection at:', promise, 'reason:', reason, 'Application');
-      gracefulShutdown('unhandledRejection');
-    });
-
-    // Start the server
-    await app.listen(config.PORT, () => {
-      logger.log(`🚀 Application is running on: ${config.APP_URL}`, 'Application');
-      logger.log(`📊 Environment: ${config.NODE_ENV}`, 'Application');
-      logger.log(`📝 API Documentation: ${config.APP_URL}/${config.SWAGGER_PATH}`, 'Application');
-      logger.log(`🔒 Security middlewares enabled`, 'Application');
-    });
-
-  } catch (error) {
-    tempLogger.error('Failed to start application:', error);
-    process.exit(1);
+  // Configurações específicas para ambiente
+  const port = configService.get('PORT') || 3001;
+  const environment = configService.get('NODE_ENV') || 'development';
+  
+  await app.listen(port);
+  console.log(`🚀 Application is running on: http://localhost:${port}`);
+  console.log(`🌍 Environment: ${environment}`);
+  console.log(`🛡️  Security features enabled: Helmet, CORS, Rate Limiting, Compression`);
+  
+  // Log do Swagger apenas em desenvolvimento
+  if (environment !== 'production') {
+    const swaggerPath = configService.get('SWAGGER_PATH') || 'api-docs';
+    console.log(`📚 Swagger documentation available at: http://localhost:${port}/${swaggerPath}`);
   }
 }
 
-// Start the application
 bootstrap();

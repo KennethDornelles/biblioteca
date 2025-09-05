@@ -29,15 +29,6 @@ export function setupSwagger(app: INestApplication, config: EnvironmentVariables
       },
       'JWT-auth',
     )
-    .addTag('Auth', 'Endpoints de autenticação e autorização')
-    .addTag('Users', 'Gerenciamento de usuários')
-    .addTag('Students', 'Gerenciamento de estudantes')
-    .addTag('Materials', 'Gerenciamento de materiais')
-    .addTag('Loans', 'Gerenciamento de empréstimos')
-    .addTag('Reservations', 'Gerenciamento de reservas')
-    .addTag('Fines', 'Gerenciamento de multas')
-    .addTag('Reports', 'Relatórios e estatísticas')
-    .addTag('Notifications', 'Sistema de notificações')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

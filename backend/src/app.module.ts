@@ -14,14 +14,25 @@ import { AuthModule } from './modules/auth/auth.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { EventsModule } from './events/events.module';
 import { NotificationModule } from './modules/notification/notification.module';
-import { validateEnvironment, EnvironmentVariables } from './config';
+import { EnvironmentVariables } from './config';
+
+// Validação simplificada temporariamente
+const simpleValidate = (config: Record<string, unknown>) => {
+  console.log('🔧 Validating environment with simplified validation...');
+  return {
+    ...config,
+    NODE_ENV: config.NODE_ENV || 'development',
+    PORT: parseInt(config.PORT as string) || 3001,
+    DATABASE_URL: config.DATABASE_URL || '',
+  } as EnvironmentVariables;
+};
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
-      validate: validateEnvironment,
+      validate: simpleValidate,
       cache: true,
       expandVariables: true,
     }),

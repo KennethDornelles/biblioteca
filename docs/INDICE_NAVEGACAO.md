@@ -96,3 +96,17 @@
 **Última atualização**: Janeiro 2025  
 **Versão**: 1.0.0  
 **Status**: Em desenvolvimento ativo
+
+
+### ��� **Documentação dos Módulos**
+- [Auth Module](./backend/modules/AUTH_README.md) - Documentação do módulo de autenticação
+- [Fine Module](./backend/modules/FINE_README.md) - Documentação do módulo de multas
+- [Reservation Module](./backend/modules/RESERVATION_README.md) - Documentação do módulo de reservas
+- [Review Module](./backend/modules/REVIEW_README.md) - Documentação do módulo de avaliações
+- [System Configuration Module](./backend/modules/SYSTEM_CONFIGURATION_README.md) - Documentação do módulo de configuração do sistema
+
+### ��� **Frontend**
+- [Frontend Documentation](./frontend/FRONTEND_README.md) - Documentação específica do frontend
+
+### ��� **Segurança**
+- [Security Improvements](./backend/SECURITY_IMPROVEMENTS.md) - Melhorias de segurança implementadas

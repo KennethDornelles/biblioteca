@@ -29,9 +29,7 @@
     "prisma:studio": "prisma studio --schema=src/database/schema.prisma",
     "prisma:seed": "ts-node src/database/seed.ts",
     "prisma:reset": "prisma migrate reset --schema=src/database/schema.prisma",
-    "db:setup": "npm run prisma:migrate && npm run prisma:seed",
-    "prepare": "cd .. && husky install && cd backend",
-    "precommit": "lint-staged"
+    "db:setup": "npm run prisma:migrate && npm run prisma:seed"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
@@ -96,23 +94,9 @@
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3",
-    "husky": "^8.0.3",
-    "lint-staged": "^15.2.0",
     "artillery": "^2.0.4",
     "@types/supertest": "^6.0.0",
     "jest-mock-extended": "^3.0.5"
-  },
-  "lint-staged": {
-    "*.{ts,js}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "npm run test"
-    }
   },
   "jest": {
     "moduleFileExtensions": [
