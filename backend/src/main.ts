@@ -50,6 +50,9 @@ async function bootstrap() {
     maxAge: 86400, // Cache preflight por 24 horas
   });
 
+  // Configurar prefixo global da API
+  app.setGlobalPrefix('api');
+
   // Configuração do Swagger para documentação da API
   const envConfig = configService.get<EnvironmentVariables>('') as EnvironmentVariables;
   setupSwagger(app, envConfig || {

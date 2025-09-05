@@ -130,7 +130,12 @@ export class AuthService {
       throw new UnauthorizedException('Usuário não encontrado');
     }
 
-    const { password: _, ...result } = user;
-    return result;
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      type: user.type,
+      active: user.active,
+    };
   }
 }

@@ -1,0 +1,396 @@
+<div class="search-container">
+  <!-- Cabeçalho da busca -->
+  <div class="search-header">
+    <h1>Buscar Materiais</h1>
+    <p class="search-subtitle">Encontre livros, artigos, teses e outros materiais da biblioteca</p>
+  </div>
+
+  <!-- Barra de busca principal -->
+  <div class="search-bar">
+    <div class="search-input-container">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput()"
+        (keyup.enter)="onSearchSubmit()"
+        placeholder="Digite título, autor, ISBN ou palavras-chave..."
+        class="search-input"
+        [disabled]="loading"
+      />
+      <button
+        type="button"
+        (click)="onSearchSubmit()"
+        class="search-button"
+        [disabled]="loading"
+      >
+        <span *ngIf="!loading">🔍</span>
+        <span *ngIf="loading">⏳</span>
+      </button>
+    </div>
+
+    <div class="search-actions">
+      <button
+        type="button"
+        (click)="toggleFilters()"
+        class="filter-toggle"
+        [class.active]="showFilters"
+      >
+        Filtros {{ showFilters ? '▼' : '▶' }}
+      </button>
+      <button
+        type="button"
+        (click)="toggleAdvancedSearch()"
+        class="advanced-toggle"
+        [class.active]="showAdvancedSearch"
+      >
+        Busca Avançada {{ showAdvancedSearch ? '▼' : '▶' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros Básicos -->
+  <div class="filters-container" *ngIf="showFilters">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="category">Categoria:</label>
+        <select
+          id="category"
+          [(ngModel)]="selectedCategory"
+          (change)="onFilterChange()"
+          class="filter-select"
+        >
+          <option value="">Todas as categorias</option>
+          <option *ngFor="let category of categories" [value]="category.name">
+            {{ category.name }} ({{ category.count }})
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="type">Tipo:</label>
+        <select
+          id="type"
+          [(ngModel)]="selectedType"
+          (change)="onFilterChange()"
+          class="filter-select"
+        >
+          <option value="">Todos os tipos</option>
+          <option *ngFor="let type of materialTypes" [value]="type.type">
+            {{ type.icon }} {{ type.name }} ({{ type.count }})
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="status">Status:</label>
+        <select
+          id="status"
+          [(ngModel)]="selectedStatus"
+          (change)="onFilterChange()"
+          class="filter-select"
+        >
+          <option value="">Todos os status</option>
+          <option value="AVAILABLE">Disponível</option>
+          <option value="BORROWED">Emprestado</option>
+          <option value="RESERVED">Reservado</option>
+          <option value="MAINTENANCE">Manutenção</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="sortBy">Ordenar por:</label>
+        <select
+          id="sortBy"
+          [(ngModel)]="sortBy"
+          (change)="onSortChange()"
+          class="filter-select"
+        >
+          <option value="title">Título</option>
+          <option value="author">Autor</option>
+          <option value="publicationYear">Ano de Publicação</option>
+          <option value="createdAt">Data de Adição</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="sortOrder">Ordem:</label>
+        <select
+          id="sortOrder"
+          [(ngModel)]="sortOrder"
+          (change)="onSortChange()"
+          class="filter-select"
+        >
+          <option value="asc">Crescente</option>
+          <option value="desc">Decrescente</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button type="button" (click)="clearFilters()" class="clear-filters">
+        Limpar Filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Busca Avançada -->
+  <div class="advanced-search-container" *ngIf="showAdvancedSearch">
+    <div class="advanced-search-form">
+      <h3>🔍 Busca Avançada</h3>
+      <div class="advanced-fields-grid">
+        <div class="advanced-field-group">
+          <label for="author">Autor:</label>
+          <input
+            type="text"
+            id="author"
+            [(ngModel)]="advancedSearch.author"
+            placeholder="Nome do autor"
+            class="advanced-input"
+          />
+        </div>
+
+        <div class="advanced-field-group">
+          <label for="publisher">Editora:</label>
+          <input
+            type="text"
+            id="publisher"
+            [(ngModel)]="advancedSearch.publisher"
+            placeholder="Nome da editora"
+            class="advanced-input"
+          />
+        </div>
+
+        <div class="advanced-field-group">
+          <label for="isbn">ISBN:</label>
+          <input
+            type="text"
+            id="isbn"
+            [(ngModel)]="advancedSearch.isbn"
+            placeholder="ISBN do material"
+            class="advanced-input"
+          />
+        </div>
+
+        <div class="advanced-field-group">
+          <label for="publicationYear">Ano de Publicação:</label>
+          <input
+            type="number"
+            id="publicationYear"
+            [(ngModel)]="advancedSearch.publicationYear"
+            placeholder="Ex: 2023"
+            class="advanced-input"
+            min="1900"
+            max="2030"
+          />
+        </div>
+
+        <div class="advanced-field-group">
+          <label for="language">Idioma:</label>
+          <select
+            id="language"
+            [(ngModel)]="advancedSearch.language"
+            class="advanced-select"
+          >
+            <option value="">Todos os idiomas</option>
+            <option value="pt">Português</option>
+            <option value="en">Inglês</option>
+            <option value="es">Espanhol</option>
+            <option value="fr">Francês</option>
+            <option value="de">Alemão</option>
+            <option value="it">Italiano</option>
+          </select>
+        </div>
+
+        <div class="advanced-field-group">
+          <label for="location">Localização:</label>
+          <input
+            type="text"
+            id="location"
+            [(ngModel)]="advancedSearch.location"
+            placeholder="Ex: Estante A, Prateleira 3"
+            class="advanced-input"
+          />
+        </div>
+
+        <div class="advanced-field-group">
+          <label for="keywords">Palavras-chave:</label>
+          <input
+            type="text"
+            id="keywords"
+            [(ngModel)]="advancedSearch.keywords"
+            placeholder="Palavras separadas por vírgula"
+            class="advanced-input"
+          />
+        </div>
+
+        <div class="advanced-field-group">
+          <label for="dateRange">Período de Aquisição:</label>
+          <div class="date-range">
+            <input
+              type="date"
+              [(ngModel)]="advancedSearch.startDate"
+              class="advanced-input"
+              placeholder="Data inicial"
+            />
+            <span>até</span>
+            <input
+              type="date"
+              [(ngModel)]="advancedSearch.endDate"
+              class="advanced-input"
+              placeholder="Data final"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="advanced-actions">
+        <button type="button" (click)="onAdvancedSearch()" class="search-advanced-button">
+          🔍 Buscar
+        </button>
+        <button type="button" (click)="clearAdvancedSearch()" class="clear-advanced-button">
+          Limpar Busca Avançada
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resultados da busca -->
+  <div class="search-results">
+    <!-- Informações dos resultados -->
+    <div class="results-info" *ngIf="searchResults.length > 0 || loading">
+      <div class="results-count">
+        <span *ngIf="!loading && totalResults > 0">
+          {{ totalResults }} resultado(s) encontrado(s)
+        </span>
+        <span *ngIf="loading">Buscando...</span>
+        <span *ngIf="!loading && totalResults === 0 && searchQuery">
+          Nenhum resultado encontrado para "{{ searchQuery }}"
+        </span>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Carregando resultados...</p>
+    </div>
+
+    <!-- Erro -->
+    <div class="error" *ngIf="error">
+      <p>❌ {{ error }}</p>
+      <button type="button" (click)="onSearchSubmit()" class="retry-button">
+        Tentar Novamente
+      </button>
+    </div>
+
+    <!-- Lista de resultados -->
+    <div class="results-list" *ngIf="!loading && searchResults.length > 0">
+      <div
+        *ngFor="let material of searchResults"
+        class="material-card"
+        (click)="goToMaterial(material.id)"
+      >
+        <div class="material-header">
+          <div class="material-type">
+            <span class="type-icon">{{ getTypeIcon(material.type) }}</span>
+            <span class="type-text">{{ getTypeText(material.type) }}</span>
+          </div>
+          <div class="material-status">
+            <span class="status-badge" [class]="getStatusClass(material.status)">
+              {{ getStatusText(material.status) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="material-content">
+          <h3 class="material-title">{{ material.title }}</h3>
+          <p class="material-author">por {{ material.author }}</p>
+
+          <div class="material-details">
+            <div class="detail-item" *ngIf="material.publisher">
+              <strong>Editora:</strong> {{ material.publisher }}
+            </div>
+            <div class="detail-item" *ngIf="material.publicationYear">
+              <strong>Ano:</strong> {{ material.publicationYear }}
+            </div>
+            <div class="detail-item" *ngIf="material.isbn">
+              <strong>ISBN:</strong> {{ material.isbn }}
+            </div>
+            <div class="detail-item">
+              <strong>Categoria:</strong>
+              <span class="category-link" (click)="goToCategory(material.category); $event.stopPropagation()">
+                {{ material.category }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <strong>Localização:</strong> {{ material.location }}
+            </div>
+          </div>
+
+          <div class="material-description" *ngIf="material.description">
+            <p>{{ material.description | slice:0:200 }}{{ material.description.length > 200 ? '...' : '' }}</p>
+          </div>
+
+          <div class="material-keywords" *ngIf="material.keywords">
+            <div class="keywords">
+              <span *ngFor="let keyword of material.keywords.split(',').slice(0, 3)" class="keyword">
+                {{ keyword.trim() }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paginação -->
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+      <button
+        type="button"
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="page-button"
+      >
+        Anterior
+      </button>
+
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          type="button"
+          (click)="onPageChange(page)"
+          [class.active]="page === currentPage"
+          class="page-number"
+        >
+          {{ page }}
+        </button>
+      </div>
+
+      <button
+        type="button"
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="page-button"
+      >
+        Próximo
+      </button>
+    </div>
+
+    <!-- Mensagem quando não há busca -->
+    <div class="no-search" *ngIf="!loading && !searchQuery && searchResults.length === 0">
+      <div class="no-search-content">
+        <h3>🔍 Comece sua busca</h3>
+        <p>Digite um termo na barra de busca acima para encontrar materiais da biblioteca.</p>
+        <div class="search-suggestions">
+          <h4>Sugestões de busca:</h4>
+          <ul>
+            <li>Digite o título do livro</li>
+            <li>Digite o nome do autor</li>
+            <li>Digite o ISBN</li>
+            <li>Use palavras-chave relacionadas ao assunto</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

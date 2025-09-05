@@ -1,0 +1,282 @@
+<div class="materials-container">
+  <!-- Cabeçalho do catálogo -->
+  <div class="materials-header">
+    <div class="header-content">
+      <h1>Catálogo de Materiais</h1>
+      <p class="materials-subtitle">Explore todos os materiais disponíveis na biblioteca</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" (click)="goToSearch()" class="search-button">
+        🔍 Busca Avançada
+      </button>
+    </div>
+  </div>
+
+  <!-- Estatísticas do catálogo -->
+  <div class="catalog-stats">
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-content">
+        <div class="stat-number">{{ totalMaterials }}</div>
+        <div class="stat-label">Materiais</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📂</div>
+      <div class="stat-content">
+        <div class="stat-number">{{ categories.length }}</div>
+        <div class="stat-label">Categorias</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📋</div>
+      <div class="stat-content">
+        <div class="stat-number">{{ materialTypes.length }}</div>
+        <div class="stat-label">Tipos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controles do catálogo -->
+  <div class="catalog-controls">
+    <div class="controls-left">
+      <div class="sort-controls">
+        <label for="sortBy">Ordenar por:</label>
+        <select
+          id="sortBy"
+          [(ngModel)]="sortBy"
+          (change)="onSortChange()"
+          class="sort-select"
+        >
+          <option value="title">Título</option>
+          <option value="author">Autor</option>
+          <option value="publicationYear">Ano de Publicação</option>
+          <option value="createdAt">Data de Adição</option>
+        </select>
+
+        <select
+          [(ngModel)]="sortOrder"
+          (change)="onSortChange()"
+          class="sort-select"
+        >
+          <option value="asc">Crescente</option>
+          <option value="desc">Decrescente</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="controls-right">
+      <div class="view-controls">
+        <button
+          type="button"
+          (click)="onViewModeChange('grid')"
+          class="view-button"
+          [class.active]="viewMode === 'grid'"
+          title="Visualização em grade"
+        >
+          ⊞
+        </button>
+        <button
+          type="button"
+          (click)="onViewModeChange('list')"
+          class="view-button"
+          [class.active]="viewMode === 'list'"
+          title="Visualização em lista"
+        >
+          ☰
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navegação rápida por categorias -->
+  <div class="quick-navigation">
+    <h3>Navegação Rápida</h3>
+    <div class="nav-categories">
+      <button
+        *ngFor="let category of categories.slice(0, 8)"
+        type="button"
+        (click)="goToCategory(category.name)"
+        class="nav-category"
+      >
+        {{ category.name }} ({{ category.count }})
+      </button>
+    </div>
+
+    <div class="nav-types">
+      <button
+        *ngFor="let type of materialTypes.slice(0, 6)"
+        type="button"
+        (click)="goToType(type.type)"
+        class="nav-type"
+      >
+        {{ type.icon }} {{ type.name }} ({{ type.count }})
+      </button>
+    </div>
+  </div>
+
+  <!-- Resultados do catálogo -->
+  <div class="catalog-results">
+    <!-- Informações dos resultados -->
+    <div class="results-info" *ngIf="materials.length > 0 || loading">
+      <div class="results-count">
+        <span *ngIf="!loading && totalMaterials > 0">
+          Mostrando {{ materials.length }} de {{ totalMaterials }} materiais
+        </span>
+        <span *ngIf="loading">Carregando catálogo...</span>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Carregando catálogo...</p>
+    </div>
+
+    <!-- Erro -->
+    <div class="error" *ngIf="error">
+      <p>❌ {{ error }}</p>
+      <button type="button" (click)="loadMaterials()" class="retry-button">
+        Tentar Novamente
+      </button>
+    </div>
+
+    <!-- Lista de materiais - Grade -->
+    <div class="materials-grid" *ngIf="!loading && materials.length > 0 && viewMode === 'grid'">
+      <div
+        *ngFor="let material of materials"
+        class="material-card"
+        (click)="goToMaterial(material.id)"
+      >
+        <div class="material-header">
+          <div class="material-type">
+            <span class="type-icon">{{ getTypeIcon(material.type) }}</span>
+            <span class="type-text">{{ getTypeText(material.type) }}</span>
+          </div>
+          <div class="material-status">
+            <span class="status-badge" [class]="getStatusClass(material.status)">
+              {{ getStatusText(material.status) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="material-content">
+          <h3 class="material-title">{{ material.title }}</h3>
+          <p class="material-author">por {{ material.author }}</p>
+
+          <div class="material-details">
+            <div class="detail-item" *ngIf="material.publisher">
+              <strong>Editora:</strong> {{ material.publisher }}
+            </div>
+            <div class="detail-item" *ngIf="material.publicationYear">
+              <strong>Ano:</strong> {{ material.publicationYear }}
+            </div>
+            <div class="detail-item">
+              <strong>Categoria:</strong>
+              <span class="category-link" (click)="goToCategory(material.category); $event.stopPropagation()">
+                {{ material.category }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <strong>Localização:</strong> {{ material.location }}
+            </div>
+          </div>
+
+          <div class="material-description" *ngIf="material.description">
+            <p>{{ material.description | slice:0:150 }}{{ material.description.length > 150 ? '...' : '' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de materiais - Lista -->
+    <div class="materials-list" *ngIf="!loading && materials.length > 0 && viewMode === 'list'">
+      <div
+        *ngFor="let material of materials"
+        class="material-item"
+        (click)="goToMaterial(material.id)"
+      >
+        <div class="material-icon">
+          <span class="type-icon">{{ getTypeIcon(material.type) }}</span>
+        </div>
+
+        <div class="material-info">
+          <div class="material-header">
+            <h3 class="material-title">{{ material.title }}</h3>
+            <span class="status-badge" [class]="getStatusClass(material.status)">
+              {{ getStatusText(material.status) }}
+            </span>
+          </div>
+
+          <p class="material-author">por {{ material.author }}</p>
+
+          <div class="material-details">
+            <span class="detail-item" *ngIf="material.publisher">
+              <strong>Editora:</strong> {{ material.publisher }}
+            </span>
+            <span class="detail-item" *ngIf="material.publicationYear">
+              <strong>Ano:</strong> {{ material.publicationYear }}
+            </span>
+            <span class="detail-item">
+              <strong>Categoria:</strong>
+              <span class="category-link" (click)="goToCategory(material.category); $event.stopPropagation()">
+                {{ material.category }}
+              </span>
+            </span>
+            <span class="detail-item">
+              <strong>Localização:</strong> {{ material.location }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paginação -->
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+      <button
+        type="button"
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="page-button"
+      >
+        Anterior
+      </button>
+
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          type="button"
+          (click)="onPageChange(page)"
+          [class.active]="page === currentPage"
+          class="page-number"
+        >
+          {{ page }}
+        </button>
+      </div>
+
+      <button
+        type="button"
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="page-button"
+      >
+        Próximo
+      </button>
+    </div>
+
+    <!-- Mensagem quando não há materiais -->
+    <div class="no-materials" *ngIf="!loading && materials.length === 0">
+      <div class="no-materials-content">
+        <h3>📚 Nenhum material encontrado</h3>
+        <p>Não há materiais disponíveis no catálogo no momento.</p>
+        <button type="button" (click)="goToSearch()" class="search-button">
+          🔍 Fazer Busca
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

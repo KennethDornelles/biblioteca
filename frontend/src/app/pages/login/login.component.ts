@@ -33,7 +33,7 @@ export class LoginComponent {
       this.errorMessage = '';
 
       const credentials = this.loginForm.value;
-      
+
       this.authService.login(credentials).subscribe({
         next: (response) => {
           this.isLoading = false;

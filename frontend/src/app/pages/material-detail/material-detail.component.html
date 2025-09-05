@@ -1,0 +1,253 @@
+<div class="material-detail-container">
+  <!-- Navegação -->
+  <div class="breadcrumb">
+    <button type="button" (click)="goBack()" class="back-button">
+      ← Voltar ao Catálogo
+    </button>
+    <div class="breadcrumb-path">
+      <span (click)="goToSearch()" class="breadcrumb-link">Busca</span>
+      <span class="breadcrumb-separator">›</span>
+      <span (click)="goBack()" class="breadcrumb-link">Catálogo</span>
+      <span class="breadcrumb-separator">›</span>
+      <span class="breadcrumb-current">Detalhes</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Carregando detalhes do material...</p>
+  </div>
+
+  <!-- Erro -->
+  <div class="error" *ngIf="error">
+    <div class="error-content">
+      <h3>❌ Erro ao carregar material</h3>
+      <p>{{ error }}</p>
+      <div class="error-actions">
+        <button type="button" (click)="loadMaterial()" class="retry-button">
+          Tentar Novamente
+        </button>
+        <button type="button" (click)="goBack()" class="back-button">
+          Voltar ao Catálogo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detalhes do material -->
+  <div class="material-detail" *ngIf="!loading && !error && material">
+    <!-- Cabeçalho do material -->
+    <div class="material-header">
+      <div class="material-type-badge">
+        <span class="type-icon">{{ getTypeIcon(material.type) }}</span>
+        <span class="type-text">{{ getTypeText(material.type) }}</span>
+      </div>
+
+      <div class="material-status">
+        <span class="status-badge" [class]="getStatusClass(material.status)">
+          {{ getStatusText(material.status) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Informações principais -->
+    <div class="material-main">
+      <div class="material-info">
+        <h1 class="material-title">{{ material.title }}</h1>
+        <p class="material-author">por {{ material.author }}</p>
+
+        <div class="material-meta">
+          <div class="meta-item" *ngIf="material.publisher">
+            <strong>Editora:</strong> {{ material.publisher }}
+          </div>
+          <div class="meta-item" *ngIf="material.publicationYear">
+            <strong>Ano de Publicação:</strong> {{ material.publicationYear }}
+          </div>
+          <div class="meta-item" *ngIf="material.edition">
+            <strong>Edição:</strong> {{ material.edition }}
+          </div>
+          <div class="meta-item" *ngIf="material.numberOfPages">
+            <strong>Páginas:</strong> {{ material.numberOfPages }}
+          </div>
+          <div class="meta-item">
+            <strong>Idioma:</strong> {{ material.language }}
+          </div>
+        </div>
+
+        <!-- Identificadores -->
+        <div class="material-identifiers" *ngIf="material.isbn || material.issn">
+          <h3>Identificadores</h3>
+          <div class="identifier-item" *ngIf="material.isbn">
+            <strong>ISBN:</strong> {{ material.isbn }}
+          </div>
+          <div class="identifier-item" *ngIf="material.issn">
+            <strong>ISSN:</strong> {{ material.issn }}
+          </div>
+          <div class="identifier-item" *ngIf="material.assetNumber">
+            <strong>Número do Patrimônio:</strong> {{ material.assetNumber }}
+          </div>
+        </div>
+
+        <!-- Descrição -->
+        <div class="material-description" *ngIf="material.description">
+          <h3>Descrição</h3>
+          <p>{{ material.description }}</p>
+        </div>
+
+        <!-- Palavras-chave -->
+        <div class="material-keywords" *ngIf="getKeywordsArray().length > 0">
+          <h3>Palavras-chave</h3>
+          <div class="keywords-list">
+            <span *ngFor="let keyword of getKeywordsArray()" class="keyword-tag">
+              {{ keyword }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informações de localização e disponibilidade -->
+      <div class="material-sidebar">
+        <div class="availability-card">
+          <h3>Disponibilidade</h3>
+          <div class="availability-info">
+            <div class="availability-status">
+              <span class="status-indicator" [class]="getStatusClass(material.status)"></span>
+              <span class="status-text">{{ getStatusText(material.status) }}</span>
+            </div>
+
+            <div class="location-info">
+              <strong>Localização:</strong>
+              <p>{{ material.location }}</p>
+            </div>
+
+            <div class="action-buttons">
+              <button
+                type="button"
+                class="action-button borrow-button"
+                [disabled]="!canBorrow()"
+                *ngIf="canBorrow()"
+              >
+                📖 Emprestar
+              </button>
+
+              <button
+                type="button"
+                class="action-button reserve-button"
+                [disabled]="!canReserve()"
+                *ngIf="canReserve()"
+              >
+                📋 Reservar
+              </button>
+
+              <button
+                type="button"
+                class="action-button unavailable-button"
+                *ngIf="!canBorrow() && !canReserve()"
+                disabled
+              >
+                ⏸️ Indisponível
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informações administrativas -->
+        <div class="admin-info" *ngIf="material.acquisitionValue || material.acquisitionDate || material.supplier">
+          <h3>Informações Administrativas</h3>
+          <div class="admin-details">
+            <div class="admin-item" *ngIf="material.acquisitionValue">
+              <strong>Valor de Aquisição:</strong>
+              <span>{{ formatCurrency(material.acquisitionValue) }}</span>
+            </div>
+            <div class="admin-item" *ngIf="material.acquisitionDate">
+              <strong>Data de Aquisição:</strong>
+              <span>{{ formatDate(material.acquisitionDate) }}</span>
+            </div>
+            <div class="admin-item" *ngIf="material.supplier">
+              <strong>Fornecedor:</strong>
+              <span>{{ material.supplier }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Categorização -->
+        <div class="categorization">
+          <h3>Categorização</h3>
+          <div class="category-info">
+            <div class="category-item">
+              <strong>Categoria:</strong>
+              <span
+                class="category-link"
+                (click)="goToCategory(material.category)"
+              >
+                {{ material.category }}
+              </span>
+            </div>
+            <div class="category-item" *ngIf="material.subcategory">
+              <strong>Subcategoria:</strong>
+              <span>{{ material.subcategory }}</span>
+            </div>
+            <div class="category-item">
+              <strong>Tipo:</strong>
+              <span
+                class="type-link"
+                (click)="goToType(material.type)"
+              >
+                {{ getTypeIcon(material.type) }} {{ getTypeText(material.type) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metadados -->
+        <div class="metadata">
+          <h3>Metadados</h3>
+          <div class="metadata-info">
+            <div class="metadata-item">
+              <strong>ID:</strong>
+              <span class="material-id">{{ material.id }}</span>
+            </div>
+            <div class="metadata-item">
+              <strong>Adicionado em:</strong>
+              <span>{{ formatDate(material.createdAt) }}</span>
+            </div>
+            <div class="metadata-item">
+              <strong>Última atualização:</strong>
+              <span>{{ formatDate(material.updatedAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Materiais relacionados -->
+    <div class="related-materials" *ngIf="relatedMaterials.length > 0">
+      <h2>Materiais Relacionados</h2>
+      <div class="related-grid">
+        <div
+          *ngFor="let related of relatedMaterials"
+          class="related-card"
+          (click)="goToMaterial(related.id)"
+        >
+          <div class="related-header">
+            <span class="related-type-icon">{{ getTypeIcon(related.type) }}</span>
+            <span class="related-status" [class]="getStatusClass(related.status)">
+              {{ getStatusText(related.status) }}
+            </span>
+          </div>
+
+          <div class="related-content">
+            <h4 class="related-title">{{ related.title }}</h4>
+            <p class="related-author">{{ related.author }}</p>
+            <div class="related-meta">
+              <span *ngIf="related.publisher">{{ related.publisher }}</span>
+              <span *ngIf="related.publicationYear">, {{ related.publicationYear }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
