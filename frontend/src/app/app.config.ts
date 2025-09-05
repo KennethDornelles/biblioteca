@@ -11,7 +11,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     {
       provide: 'API_BASE_URL',
-      useValue: process.env['API_BASE_URL'] || 'http://localhost:3000'
+      useValue: 'http://localhost:3000'
     }
   ]
 };

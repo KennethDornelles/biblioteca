@@ -1,0 +1,60 @@
+{
+  "version": "0.2",
+  "language": "pt,en",
+  "words": [
+    "Voltar",
+    "vindo",
+    "Faça",
+    "acessar",
+    "conta",
+    "Digite",
+    "Conho",
+    "Senha",
+    "senha",
+    "Lembrar",
+    "Esqueceu",
+    "Entrar",
+    "Entrando",
+    "Cadastre",
+    "aqui",
+    "Acesse",
+    "continuar",
+    "gerenciando",
+    "biblioteca",
+    "Bem-vindo",
+    "login",
+    "email",
+    "password",
+    "checkbox",
+    "checkmark",
+    "forgot",
+    "register",
+    "illustration",
+    "book-stack",
+    "divider",
+    "página",
+    "inicial"
+  ],
+  "ignoreWords": [],
+  "import": [],
+  "dictionaries": [
+    "pt-br",
+    "en-gb"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "pt-br",
+      "path": "node_modules/cspell-dict-pt-br/pt-br.txt.gz"
+    }
+  ],
+  "files": [
+    "src/**/*.{html,ts,scss,css,js,json}",
+    "*.{html,ts,scss,css,js,json}"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    "dist/**",
+    "*.min.js",
+    "*.min.css"
+  ]
+}

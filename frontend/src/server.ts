@@ -59,7 +59,7 @@ if (isMainModule(import.meta.url)) {
     }
 
     // Log apenas em desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env['NODE_ENV'] === 'development') {
       console.log(`Node Express server listening on http://localhost:${port}`);
     }
   });
