@@ -4,46 +4,106 @@ Este documento descreve os recursos criados para o sistema de biblioteca univers
 
 ## 📚 Módulos Criados
 
-### 1. Material
+### 1. Auth (Autenticação)
+- **Arquivo**: `src/modules/auth/`
+- **Funcionalidades**: Sistema completo de autenticação JWT, estratégias Passport, guards e middleware
+- **Status**: ✅ Criado e Integrado
+
+### 2. User (Usuário)
+- **Arquivo**: `src/modules/user/`
+- **Funcionalidades**: Gerenciamento de usuários (estudantes, professores, funcionários)
+- **Status**: ✅ Criado e Integrado
+
+### 3. Material
 - **Arquivo**: `src/modules/material/`
 - **Funcionalidades**: Gerenciamento de materiais bibliográficos (livros, revistas, DVDs, etc.)
-- **Status**: ✅ Criado
+- **Status**: ✅ Criado e Integrado
 
-### 2. Loan (Empréstimo)
+### 4. Loan (Empréstimo)
 - **Arquivo**: `src/modules/loan/`
 - **Funcionalidades**: Gerenciamento de empréstimos, renovações e devoluções
-- **Status**: ✅ Criado
+- **Status**: ✅ Criado e Integrado
 
-### 3. Sistema de Filas (Bull Queue)
+### 5. Reservation (Reserva)
+- **Arquivo**: `src/modules/reservation/`
+- **Funcionalidades**: Sistema de reservas de materiais bibliográficos
+- **Status**: ✅ Criado e Integrado
+
+### 6. Fine (Multa)
+- **Arquivo**: `src/modules/fine/`
+- **Funcionalidades**: Gerenciamento de multas por atraso e danos
+- **Status**: ✅ Criado e Integrado
+
+### 7. Review (Avaliação)
+- **Arquivo**: `src/modules/review/`
+- **Funcionalidades**: Sistema de avaliações e comentários sobre materiais
+- **Status**: ✅ Criado e Integrado
+
+### 8. System Configuration
+- **Arquivo**: `src/modules/system-configuration/`
+- **Funcionalidades**: Configurações dinâmicas do sistema
+- **Status**: ✅ Criado e Integrado
+
+### 9. Queue (Filas)
 - **Arquivo**: `src/modules/queue/`
 - **Funcionalidades**: Sistema completo de filas assíncronas para emails, notificações, relatórios e manutenção
+- **Status**: ✅ Criado e Integrado
+
+### 10. Email
+- **Arquivo**: `src/modules/email/`
+- **Funcionalidades**: Sistema de envio de emails (notificações, lembretes, relatórios)
+- **Status**: ✅ Criado e Integrado
+
+### 11. Notification
+- **Arquivo**: `src/modules/notification/`
+- **Funcionalidades**: Sistema de notificações push, SMS e in-app
+- **Status**: ✅ Criado e Integrado
+
+### 12. Maintenance
+- **Arquivo**: `src/modules/maintenance/`
+- **Funcionalidades**: Manutenção automatizada do sistema e limpeza de dados
+- **Status**: ✅ Criado e Integrado
+
+### 13. Report
+- **Arquivo**: `src/modules/report/`
+- **Funcionalidades**: Geração de relatórios em PDF, Excel e outros formatos
 - **Status**: ✅ Criado e Integrado
 
 ## 🏗️ Estrutura de Arquivos
 
 ### Enums (`src/enums/`)
+- `user-type.enum.ts` - Tipos de usuários (Estudante, Professor, Funcionário, etc.)
+- `user-status.enum.ts` - Status dos usuários (Ativo, Inativo, Suspenso, etc.)
+- `student-level.enum.ts` - Níveis de estudantes (Graduação, Pós-graduação, etc.)
 - `material-status.enum.ts` - Status dos materiais (Disponível, Emprestado, Reservado, etc.)
 - `material-type.enum.ts` - Tipos de materiais (Livro, Revista, DVD, etc.)
 - `loan-status.enum.ts` - Status dos empréstimos (Ativo, Devolvido, Em Atraso, etc.)
-- `reservation-status.enum.ts` - Status das reservas
-- `fine-status.enum.ts` - Status das multas
+- `reservation-status.enum.ts` - Status das reservas (Ativa, Cancelada, Expirada, etc.)
+- `fine-status.enum.ts` - Status das multas (Pendente, Paga, Cancelada, etc.)
 
 ### Interfaces (`src/interfaces/`)
+- `user.interface.ts` - Interfaces para usuários e perfis
 - `material.interface.ts` - Interfaces para materiais
 - `loan.interface.ts` - Interfaces para empréstimos
 - `reservation.interface.ts` - Interfaces para reservas
 - `fine.interface.ts` - Interfaces para multas
+- `review.interface.ts` - Interfaces para avaliações
+- `notification.interface.ts` - Interfaces para notificações
 - `entities/` - Entidades do domínio
 
 ### Tipos (`src/types/`)
+- `user.types.ts` - Tipos TypeScript para usuários
 - `material.types.ts` - Tipos TypeScript para materiais
 - `loan.types.ts` - Tipos TypeScript para empréstimos
+- `notification.types.ts` - Tipos TypeScript para notificações
 
 ### Constantes (`src/constants/`)
+- `user.constants.ts` - Constantes de validação e configuração para usuários
 - `material.constants.ts` - Constantes de validação e configuração para materiais
 - `loan.constants.ts` - Constantes de validação e configuração para empréstimos
 
 ### Utilitárias (`src/utils/`)
+- `user.utils.ts` - Funções utilitárias para usuários
 - `material.utils.ts` - Funções utilitárias para materiais
 - `loan.utils.ts` - Funções utilitárias para empréstimos
 

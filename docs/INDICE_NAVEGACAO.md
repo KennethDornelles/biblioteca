@@ -2,7 +2,20 @@
 
 ## 🎯 Visão Geral do Projeto
 
-**Biblioteca Universitária** é um sistema completo de gerenciamento de biblioteca acadêmica com foco em:
+**Biblioteca ### 📚 **Documentação dos Módulos**
+- [Auth Module](./backend/modules/AUTH_README.md) - Documentação do módulo de autenticação
+- [User Module](./backend/modules/USER_README.md) - Documentação do módulo de usuários
+- [Material Module](./backend/modules/MATERIAL_README.md) - Documentação do módulo de materiais
+- [Loan Module](./backend/modules/LOAN_README.md) - Documentação do módulo de empréstimos
+- [Reservation Module](./backend/modules/RESERVATION_README.md) - Documentação do módulo de reservas
+- [Fine Module](./backend/modules/FINE_README.md) - Documentação do módulo de multas
+- [Review Module](./backend/modules/REVIEW_README.md) - Documentação do módulo de avaliações
+- [System Configuration Module](./backend/modules/SYSTEM_CONFIGURATION_README.md) - Documentação do módulo de configuração do sistema
+- [Queue Module](./backend/modules/QUEUE_README.md) - Documentação do módulo de filas
+- [Email Module](./backend/modules/EMAIL_README.md) - Documentação do módulo de email
+- [Notification Module](./backend/modules/NOTIFICATION_README.md) - Documentação do módulo de notificações
+- [Maintenance Module](./backend/modules/MAINTENANCE_README.md) - Documentação do módulo de manutenção
+- [Report Module](./backend/modules/REPORT_README.md) - Documentação do módulo de relatóriossitária** é um sistema completo de gerenciamento de biblioteca acadêmica com foco em:
 
 - Gestão de usuários (estudantes, professores, funcionários)
 - Controle de materiais (livros, periódicos, mídias digitais)
@@ -98,15 +111,15 @@
 **Status**: Em desenvolvimento ativo
 
 
-### ��� **Documentação dos Módulos**
+### ��� **Documentação dos Módulos**
 - [Auth Module](./backend/modules/AUTH_README.md) - Documentação do módulo de autenticação
 - [Fine Module](./backend/modules/FINE_README.md) - Documentação do módulo de multas
 - [Reservation Module](./backend/modules/RESERVATION_README.md) - Documentação do módulo de reservas
 - [Review Module](./backend/modules/REVIEW_README.md) - Documentação do módulo de avaliações
 - [System Configuration Module](./backend/modules/SYSTEM_CONFIGURATION_README.md) - Documentação do módulo de configuração do sistema
 
-### ��� **Frontend**
+### ��� **Frontend**
 - [Frontend Documentation](./frontend/FRONTEND_README.md) - Documentação específica do frontend
 
-### ��� **Segurança**
+### ��� **Segurança**
 - [Security Improvements](./backend/SECURITY_IMPROVEMENTS.md) - Melhorias de segurança implementadas
