@@ -2,26 +2,39 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { SearchComponent } from './pages/search/search.component';
-import { MaterialsComponent } from './pages/materials/materials.component';
-import { MaterialDetailComponent } from './pages/material-detail/material-detail.component';
-import { MaterialsCategoryComponent } from './pages/materials-category/materials-category.component';
-import { MaterialsTypeComponent } from './pages/materials-type/materials-type.component';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    canActivate: [AuthGuard]
+  },
 
-  // Páginas de busca e catálogo
-  { path: 'search', component: SearchComponent },
-  { path: 'materials', component: MaterialsComponent },
-  { path: 'material/:id', component: MaterialDetailComponent },
-  { path: 'materials/category/:category', component: MaterialsCategoryComponent },
-  { path: 'materials/type/:type', component: MaterialsTypeComponent },
+  // Páginas de busca e catálogo com lazy loading
+  {
+    path: 'search',
+    loadComponent: () => import('./pages/search/search.component').then(m => m.SearchComponent)
+  },
+  {
+    path: 'materials',
+    loadComponent: () => import('./pages/materials/materials.component').then(m => m.MaterialsComponent)
+  },
+  {
+    path: 'material/:id',
+    loadComponent: () => import('./pages/material-detail/material-detail.component').then(m => m.MaterialDetailComponent)
+  },
+  {
+    path: 'materials/category/:category',
+    loadComponent: () => import('./pages/materials-category/materials-category.component').then(m => m.MaterialsCategoryComponent)
+  },
+  {
+    path: 'materials/type/:type',
+    loadComponent: () => import('./pages/materials-type/materials-type.component').then(m => m.MaterialsTypeComponent)
+  },
 
   { path: '**', redirectTo: '' }
 ];

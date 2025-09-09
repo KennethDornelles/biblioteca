@@ -267,6 +267,9 @@
           Nenhum resultado encontrado para "{{ searchQuery }}"
         </span>
       </div>
+      <div class="search-time" *ngIf="!loading && totalResults > 0">
+        <small>Busca realizada em {{ searchTime }}ms</small>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -292,12 +295,12 @@
       >
         <div class="material-header">
           <div class="material-type">
-            <span class="type-icon">{{ getTypeIcon(material.type) }}</span>
-            <span class="type-text">{{ getTypeText(material.type) }}</span>
+            <span class="type-icon">{{ material.typeIcon || getTypeIcon(material.type) }}</span>
+            <span class="type-text">{{ material.typeLabel || getTypeText(material.type) }}</span>
           </div>
           <div class="material-status">
-            <span class="status-badge" [class]="getStatusClass(material.status)">
-              {{ getStatusText(material.status) }}
+            <span class="status-badge" [class]="getStatusClass(material.status)" [style.background-color]="material.statusColor">
+              {{ material.statusLabel || getStatusText(material.status) }}
             </span>
           </div>
         </div>

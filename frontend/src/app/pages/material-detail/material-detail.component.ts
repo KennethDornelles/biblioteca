@@ -102,57 +102,59 @@ export class MaterialDetailComponent implements OnInit, OnDestroy {
   }
 
   getStatusText(status: MaterialStatus): string {
-    const statusMap = {
+    const statusMap: Record<MaterialStatus, string> = {
       [MaterialStatus.AVAILABLE]: 'Disponível',
-      [MaterialStatus.BORROWED]: 'Emprestado',
+      [MaterialStatus.LOANED]: 'Emprestado',
       [MaterialStatus.RESERVED]: 'Reservado',
       [MaterialStatus.MAINTENANCE]: 'Manutenção',
       [MaterialStatus.LOST]: 'Perdido',
-      [MaterialStatus.DAMAGED]: 'Danificado'
+      [MaterialStatus.DECOMMISSIONED]: 'Descomissionado'
     };
     return statusMap[status] || status;
   }
 
   getStatusClass(status: MaterialStatus): string {
-    const classMap = {
+    const classMap: Record<MaterialStatus, string> = {
       [MaterialStatus.AVAILABLE]: 'status-available',
-      [MaterialStatus.BORROWED]: 'status-borrowed',
+      [MaterialStatus.LOANED]: 'status-borrowed',
       [MaterialStatus.RESERVED]: 'status-reserved',
       [MaterialStatus.MAINTENANCE]: 'status-maintenance',
       [MaterialStatus.LOST]: 'status-lost',
-      [MaterialStatus.DAMAGED]: 'status-damaged'
+      [MaterialStatus.DECOMMISSIONED]: 'status-decommissioned'
     };
     return classMap[status] || '';
   }
 
   getTypeText(type: MaterialType): string {
-    const typeMap = {
+    const typeMap: Record<MaterialType, string> = {
       [MaterialType.BOOK]: 'Livro',
       [MaterialType.MAGAZINE]: 'Revista',
       [MaterialType.JOURNAL]: 'Periódico',
       [MaterialType.THESIS]: 'Tese',
       [MaterialType.CD]: 'CD',
       [MaterialType.DVD]: 'DVD',
-      [MaterialType.EBOOK]: 'E-book',
-      [MaterialType.AUDIOBOOK]: 'Audiobook',
       [MaterialType.MAP]: 'Mapa',
-      [MaterialType.MANUSCRIPT]: 'Manuscrito'
+      [MaterialType.DISSERTATION]: 'Dissertação',
+      [MaterialType.MONOGRAPH]: 'Monografia',
+      [MaterialType.ARTICLE]: 'Artigo',
+      [MaterialType.OTHER]: 'Outro'
     };
     return typeMap[type] || type;
   }
 
   getTypeIcon(type: MaterialType): string {
-    const iconMap = {
+    const iconMap: Record<MaterialType, string> = {
       [MaterialType.BOOK]: '📚',
       [MaterialType.MAGAZINE]: '📰',
       [MaterialType.JOURNAL]: '📄',
       [MaterialType.THESIS]: '🎓',
       [MaterialType.CD]: '💿',
       [MaterialType.DVD]: '💿',
-      [MaterialType.EBOOK]: '📱',
-      [MaterialType.AUDIOBOOK]: '🎧',
       [MaterialType.MAP]: '🗺️',
-      [MaterialType.MANUSCRIPT]: '📜'
+      [MaterialType.DISSERTATION]: '🎓',
+      [MaterialType.MONOGRAPH]: '📖',
+      [MaterialType.ARTICLE]: '📄',
+      [MaterialType.OTHER]: '📁'
     };
     return iconMap[type] || '📄';
   }
@@ -181,6 +183,6 @@ export class MaterialDetailComponent implements OnInit, OnDestroy {
   }
 
   canReserve(): boolean {
-    return this.material?.status === MaterialStatus.BORROWED;
+    return this.material?.status === MaterialStatus.LOANED;
   }
 }

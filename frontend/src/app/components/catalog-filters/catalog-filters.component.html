@@ -1,0 +1,275 @@
+<div class="catalog-filters">
+  <!-- Filtros básicos -->
+  <div class="basic-filters">
+    <div class="filter-group">
+      <label for="query">Busca geral:</label>
+      <input
+        type="text"
+        id="query"
+        [(ngModel)]="filters.query"
+        (ngModelChange)="onFiltersChange()"
+        placeholder="Digite título, autor, ISBN..."
+        class="filter-input"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label for="category">Categoria:</label>
+      <select
+        id="category"
+        [(ngModel)]="filters.category"
+        (ngModelChange)="onCategoryChange()"
+        class="filter-select"
+      >
+        <option value="">Todas as categorias</option>
+        <option *ngFor="let category of categories" [value]="category.name">
+          {{ category.name }} ({{ category.count }})
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group" *ngIf="subcategories.length > 0">
+      <label for="subcategory">Subcategoria:</label>
+      <select
+        id="subcategory"
+        [(ngModel)]="filters.subcategory"
+        (ngModelChange)="onFiltersChange()"
+        class="filter-select"
+      >
+        <option value="">Todas as subcategorias</option>
+        <option *ngFor="let subcategory of subcategories" [value]="subcategory.subcategory">
+          {{ subcategory.subcategory }} ({{ subcategory.count }})
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="type">Tipo:</label>
+      <select
+        id="type"
+        [(ngModel)]="filters.type"
+        (ngModelChange)="onFiltersChange()"
+        class="filter-select"
+      >
+        <option value="">Todos os tipos</option>
+        <option *ngFor="let type of materialTypes" [value]="type.type">
+          {{ type.icon }} {{ type.name }} ({{ type.count }})
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="status">Status:</label>
+      <select
+        id="status"
+        [(ngModel)]="filters.status"
+        (ngModelChange)="onFiltersChange()"
+        class="filter-select"
+      >
+        <option value="">Todos os status</option>
+        <option *ngFor="let status of statusOptions" [value]="status.value">
+          {{ status.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="available">
+        <input
+          type="checkbox"
+          id="available"
+          [(ngModel)]="filters.available"
+          (ngModelChange)="onFiltersChange()"
+          class="filter-checkbox"
+        />
+        Apenas disponíveis
+      </label>
+    </div>
+  </div>
+
+  <!-- Botões de ação -->
+  <div class="filter-actions">
+    <button
+      type="button"
+      (click)="toggleAdvancedFilters()"
+      class="toggle-advanced-btn"
+      [class.active]="showAdvancedFilters"
+    >
+      {{ showAdvancedFilters ? 'Filtros Simples' : 'Filtros Avançados' }}
+    </button>
+
+    <button
+      type="button"
+      (click)="onApplyFilters()"
+      class="apply-filters-btn"
+    >
+      Aplicar Filtros
+    </button>
+
+    <button
+      type="button"
+      (click)="onClearFilters()"
+      class="clear-filters-btn"
+    >
+      Limpar Filtros
+    </button>
+  </div>
+
+  <!-- Filtros avançados -->
+  <div class="advanced-filters" *ngIf="showAdvancedFilters">
+    <h4>Filtros Avançados</h4>
+
+    <div class="advanced-filters-grid">
+      <div class="filter-group">
+        <label for="title">Título:</label>
+        <input
+          type="text"
+          id="title"
+          [(ngModel)]="filters.title"
+          (ngModelChange)="onFiltersChange()"
+          placeholder="Buscar por título específico"
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="author">Autor:</label>
+        <input
+          type="text"
+          id="author"
+          [(ngModel)]="filters.author"
+          (ngModelChange)="onFiltersChange()"
+          placeholder="Buscar por autor específico"
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="isbn">ISBN:</label>
+        <input
+          type="text"
+          id="isbn"
+          [(ngModel)]="filters.isbn"
+          (ngModelChange)="onFiltersChange()"
+          placeholder="Digite o ISBN"
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="publisher">Editora:</label>
+        <input
+          type="text"
+          id="publisher"
+          [(ngModel)]="filters.publisher"
+          (ngModelChange)="onFiltersChange()"
+          placeholder="Buscar por editora"
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="language">Idioma:</label>
+        <select
+          id="language"
+          [(ngModel)]="filters.language"
+          (ngModelChange)="onFiltersChange()"
+          class="filter-select"
+        >
+          <option value="">Todos os idiomas</option>
+          <option *ngFor="let lang of languageOptions" [value]="lang">
+            {{ lang }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="location">Localização:</label>
+        <input
+          type="text"
+          id="location"
+          [(ngModel)]="filters.location"
+          (ngModelChange)="onFiltersChange()"
+          placeholder="Ex: Estante A, Prateleira 3"
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="assetNumber">Número do Patrimônio:</label>
+        <input
+          type="text"
+          id="assetNumber"
+          [(ngModel)]="filters.assetNumber"
+          (ngModelChange)="onFiltersChange()"
+          placeholder="Digite o número do patrimônio"
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="minYear">Ano mínimo:</label>
+        <input
+          type="number"
+          id="minYear"
+          [(ngModel)]="filters.minYear"
+          (ngModelChange)="onFiltersChange()"
+          placeholder="Ex: 2020"
+          class="filter-input"
+          min="1900"
+          max="2030"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="maxYear">Ano máximo:</label>
+        <input
+          type="number"
+          id="maxYear"
+          [(ngModel)]="filters.maxYear"
+          (ngModelChange)="onFiltersChange()"
+          placeholder="Ex: 2024"
+          class="filter-input"
+          min="1900"
+          max="2030"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="hasReviews">
+          <input
+            type="checkbox"
+            id="hasReviews"
+            [(ngModel)]="filters.hasReviews"
+            (ngModelChange)="onFiltersChange()"
+            class="filter-checkbox"
+          />
+          Apenas com avaliações
+        </label>
+      </div>
+
+      <div class="filter-group" *ngIf="filters.hasReviews">
+        <label for="minRating">Avaliação mínima:</label>
+        <select
+          id="minRating"
+          [(ngModel)]="filters.minRating"
+          (ngModelChange)="onFiltersChange()"
+          class="filter-select"
+        >
+          <option value="">Qualquer avaliação</option>
+          <option value="1">1 estrela ou mais</option>
+          <option value="2">2 estrelas ou mais</option>
+          <option value="3">3 estrelas ou mais</option>
+          <option value="4">4 estrelas ou mais</option>
+          <option value="5">5 estrelas</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Carregando opções de filtro...</p>
+  </div>
+</div>

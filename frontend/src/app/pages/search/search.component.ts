@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -11,7 +11,8 @@ import { Material, MaterialSearchParams, MaterialSearchResponse, MaterialCategor
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './search.component.html',
-  styleUrl: './search.component.scss'
+  styleUrl: './search.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SearchComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -25,6 +26,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   itemsPerPage = 20;
   loading = false;
   error: string | null = null;
+  searchTime = 0;
 
   // Filtros
   searchQuery = '';
@@ -100,6 +102,8 @@ export class SearchComponent implements OnInit, OnDestroy {
             this.searchResults = response.materials;
             this.totalResults = response.total;
             this.totalPages = response.totalPages;
+            this.searchTime = response.searchTime;
+            console.log(`Busca realizada em ${response.searchTime}ms`);
           }
           this.loading = false;
         },
@@ -121,6 +125,7 @@ export class SearchComponent implements OnInit, OnDestroy {
               this.searchResults = response.materials;
               this.totalResults = response.total;
               this.totalPages = response.totalPages;
+              this.searchTime = response.searchTime;
             }
             this.loading = false;
           },
@@ -282,6 +287,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.currentPage = 1;
     this.searchResults = [];
     this.totalResults = 0;
+    this.searchTime = 0;
   }
 
   onAdvancedSearch(): void {
@@ -339,57 +345,59 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   getStatusText(status: MaterialStatus): string {
-    const statusMap = {
+    const statusMap: Record<MaterialStatus, string> = {
       [MaterialStatus.AVAILABLE]: 'Disponível',
-      [MaterialStatus.BORROWED]: 'Emprestado',
+      [MaterialStatus.LOANED]: 'Emprestado',
       [MaterialStatus.RESERVED]: 'Reservado',
       [MaterialStatus.MAINTENANCE]: 'Manutenção',
       [MaterialStatus.LOST]: 'Perdido',
-      [MaterialStatus.DAMAGED]: 'Danificado'
+      [MaterialStatus.DECOMMISSIONED]: 'Descomissionado'
     };
     return statusMap[status] || status;
   }
 
   getStatusClass(status: MaterialStatus): string {
-    const classMap = {
+    const classMap: Record<MaterialStatus, string> = {
       [MaterialStatus.AVAILABLE]: 'status-available',
-      [MaterialStatus.BORROWED]: 'status-borrowed',
+      [MaterialStatus.LOANED]: 'status-borrowed',
       [MaterialStatus.RESERVED]: 'status-reserved',
       [MaterialStatus.MAINTENANCE]: 'status-maintenance',
       [MaterialStatus.LOST]: 'status-lost',
-      [MaterialStatus.DAMAGED]: 'status-damaged'
+      [MaterialStatus.DECOMMISSIONED]: 'status-decommissioned'
     };
     return classMap[status] || '';
   }
 
   getTypeText(type: MaterialType): string {
-    const typeMap = {
+    const typeMap: Record<MaterialType, string> = {
       [MaterialType.BOOK]: 'Livro',
       [MaterialType.MAGAZINE]: 'Revista',
       [MaterialType.JOURNAL]: 'Periódico',
       [MaterialType.THESIS]: 'Tese',
       [MaterialType.CD]: 'CD',
       [MaterialType.DVD]: 'DVD',
-      [MaterialType.EBOOK]: 'E-book',
-      [MaterialType.AUDIOBOOK]: 'Audiobook',
       [MaterialType.MAP]: 'Mapa',
-      [MaterialType.MANUSCRIPT]: 'Manuscrito'
+      [MaterialType.DISSERTATION]: 'Dissertação',
+      [MaterialType.MONOGRAPH]: 'Monografia',
+      [MaterialType.ARTICLE]: 'Artigo',
+      [MaterialType.OTHER]: 'Outro'
     };
     return typeMap[type] || type;
   }
 
   getTypeIcon(type: MaterialType): string {
-    const iconMap = {
+    const iconMap: Record<MaterialType, string> = {
       [MaterialType.BOOK]: '📚',
       [MaterialType.MAGAZINE]: '📰',
       [MaterialType.JOURNAL]: '📄',
       [MaterialType.THESIS]: '🎓',
       [MaterialType.CD]: '💿',
       [MaterialType.DVD]: '💿',
-      [MaterialType.EBOOK]: '📱',
-      [MaterialType.AUDIOBOOK]: '🎧',
       [MaterialType.MAP]: '🗺️',
-      [MaterialType.MANUSCRIPT]: '📜'
+      [MaterialType.DISSERTATION]: '🎓',
+      [MaterialType.MONOGRAPH]: '📖',
+      [MaterialType.ARTICLE]: '📄',
+      [MaterialType.OTHER]: '📁'
     };
     return iconMap[type] || '📄';
   }

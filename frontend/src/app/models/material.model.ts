@@ -23,28 +23,32 @@ export interface Material {
   createdAt: Date;
   updatedAt: Date;
   typeIcon?: string;
+  statusLabel?: string;
+  statusColor?: string;
+  typeLabel?: string;
 }
 
 export enum MaterialStatus {
   AVAILABLE = 'AVAILABLE',
-  BORROWED = 'BORROWED',
+  LOANED = 'LOANED',
   RESERVED = 'RESERVED',
   MAINTENANCE = 'MAINTENANCE',
   LOST = 'LOST',
-  DAMAGED = 'DAMAGED'
+  DECOMMISSIONED = 'DECOMMISSIONED',
 }
 
 export enum MaterialType {
   BOOK = 'BOOK',
   MAGAZINE = 'MAGAZINE',
   JOURNAL = 'JOURNAL',
-  THESIS = 'THESIS',
-  CD = 'CD',
   DVD = 'DVD',
-  EBOOK = 'EBOOK',
-  AUDIOBOOK = 'AUDIOBOOK',
+  CD = 'CD',
+  THESIS = 'THESIS',
+  DISSERTATION = 'DISSERTATION',
+  MONOGRAPH = 'MONOGRAPH',
+  ARTICLE = 'ARTICLE',
   MAP = 'MAP',
-  MANUSCRIPT = 'MANUSCRIPT'
+  OTHER = 'OTHER',
 }
 
 export interface MaterialSearchParams {
@@ -73,6 +77,11 @@ export interface MaterialSearchResponse {
   page: number;
   limit: number;
   totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+  query?: string;
+  filters?: Record<string, any>;
+  searchTime: number;
 }
 
 export interface MaterialCategory {

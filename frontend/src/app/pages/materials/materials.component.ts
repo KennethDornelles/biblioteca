@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { MaterialService } from '../../services/material.service';
 import { Material, MaterialSearchResponse, MaterialCategory, MaterialTypeInfo, MaterialType, MaterialStatus } from '../../models/material.model';
+import { CatalogFiltersComponent, CatalogFilters } from '../../components/catalog-filters/catalog-filters.component';
 
 @Component({
   selector: 'app-materials',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CatalogFiltersComponent],
   templateUrl: './materials.component.html',
   styleUrl: './materials.component.scss'
 })
@@ -36,6 +37,7 @@ export class MaterialsComponent implements OnInit, OnDestroy {
   // Estados da UI
   viewMode: 'grid' | 'list' = 'grid';
   showFilters = false;
+  currentFilters: CatalogFilters = {};
 
   constructor(
     private materialService: MaterialService,
@@ -77,7 +79,7 @@ export class MaterialsComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
 
-    this.materialService.getAllMaterials(this.currentPage, this.itemsPerPage, this.sortBy, this.sortOrder)
+    this.materialService.getCatalogMaterials(this.currentPage, this.itemsPerPage, this.sortBy, this.sortOrder, this.currentFilters)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
@@ -129,57 +131,59 @@ export class MaterialsComponent implements OnInit, OnDestroy {
   }
 
   getStatusText(status: MaterialStatus): string {
-    const statusMap = {
+    const statusMap: Record<MaterialStatus, string> = {
       [MaterialStatus.AVAILABLE]: 'Disponível',
-      [MaterialStatus.BORROWED]: 'Emprestado',
+      [MaterialStatus.LOANED]: 'Emprestado',
       [MaterialStatus.RESERVED]: 'Reservado',
       [MaterialStatus.MAINTENANCE]: 'Manutenção',
       [MaterialStatus.LOST]: 'Perdido',
-      [MaterialStatus.DAMAGED]: 'Danificado'
+      [MaterialStatus.DECOMMISSIONED]: 'Descomissionado'
     };
     return statusMap[status] || status;
   }
 
   getStatusClass(status: MaterialStatus): string {
-    const classMap = {
+    const classMap: Record<MaterialStatus, string> = {
       [MaterialStatus.AVAILABLE]: 'status-available',
-      [MaterialStatus.BORROWED]: 'status-borrowed',
+      [MaterialStatus.LOANED]: 'status-borrowed',
       [MaterialStatus.RESERVED]: 'status-reserved',
       [MaterialStatus.MAINTENANCE]: 'status-maintenance',
       [MaterialStatus.LOST]: 'status-lost',
-      [MaterialStatus.DAMAGED]: 'status-damaged'
+      [MaterialStatus.DECOMMISSIONED]: 'status-decommissioned'
     };
     return classMap[status] || '';
   }
 
   getTypeText(type: MaterialType): string {
-    const typeMap = {
+    const typeMap: Record<MaterialType, string> = {
       [MaterialType.BOOK]: 'Livro',
       [MaterialType.MAGAZINE]: 'Revista',
       [MaterialType.JOURNAL]: 'Periódico',
       [MaterialType.THESIS]: 'Tese',
       [MaterialType.CD]: 'CD',
       [MaterialType.DVD]: 'DVD',
-      [MaterialType.EBOOK]: 'E-book',
-      [MaterialType.AUDIOBOOK]: 'Audiobook',
       [MaterialType.MAP]: 'Mapa',
-      [MaterialType.MANUSCRIPT]: 'Manuscrito'
+      [MaterialType.DISSERTATION]: 'Dissertação',
+      [MaterialType.MONOGRAPH]: 'Monografia',
+      [MaterialType.ARTICLE]: 'Artigo',
+      [MaterialType.OTHER]: 'Outro'
     };
     return typeMap[type] || type;
   }
 
   getTypeIcon(type: MaterialType): string {
-    const iconMap = {
+    const iconMap: Record<MaterialType, string> = {
       [MaterialType.BOOK]: '📚',
       [MaterialType.MAGAZINE]: '📰',
       [MaterialType.JOURNAL]: '📄',
       [MaterialType.THESIS]: '🎓',
       [MaterialType.CD]: '💿',
       [MaterialType.DVD]: '💿',
-      [MaterialType.EBOOK]: '📱',
-      [MaterialType.AUDIOBOOK]: '🎧',
       [MaterialType.MAP]: '🗺️',
-      [MaterialType.MANUSCRIPT]: '📜'
+      [MaterialType.DISSERTATION]: '🎓',
+      [MaterialType.MONOGRAPH]: '📖',
+      [MaterialType.ARTICLE]: '📄',
+      [MaterialType.OTHER]: '📁'
     };
     return iconMap[type] || '📄';
   }
@@ -201,5 +205,21 @@ export class MaterialsComponent implements OnInit, OnDestroy {
     }
 
     return pages;
+  }
+
+  onFiltersChange(filters: CatalogFilters): void {
+    this.currentFilters = filters;
+  }
+
+  onApplyFilters(filters: CatalogFilters): void {
+    this.currentFilters = filters;
+    this.currentPage = 1;
+    this.loadMaterials();
+  }
+
+  onClearFilters(): void {
+    this.currentFilters = {};
+    this.currentPage = 1;
+    this.loadMaterials();
   }
 }

@@ -40,6 +40,14 @@
     </div>
   </div>
 
+  <!-- Filtros do catálogo -->
+  <app-catalog-filters
+    [filters]="currentFilters"
+    (filtersChange)="onFiltersChange($event)"
+    (applyFilters)="onApplyFilters($event)"
+    (clearFilters)="onClearFilters()"
+  ></app-catalog-filters>
+
   <!-- Controles do catálogo -->
   <div class="catalog-controls">
     <div class="controls-left">
