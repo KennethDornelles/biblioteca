@@ -36,5 +36,27 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/materials-type/materials-type.component').then(m => m.MaterialsTypeComponent)
   },
 
+  // Páginas de empréstimos
+  {
+    path: 'loans',
+    loadComponent: () => import('./pages/loans/loans.component').then(m => m.LoansComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'loans/new',
+    loadComponent: () => import('./pages/loan-form/loan-form.component').then(m => m.LoanFormComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'loans/:id',
+    loadComponent: () => import('./pages/loan-detail/loan-detail.component').then(m => m.LoanDetailComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'loans/:id/edit',
+    loadComponent: () => import('./pages/loan-form/loan-form.component').then(m => m.LoanFormComponent),
+    canActivate: [AuthGuard]
+  },
+
   { path: '**', redirectTo: '' }
 ];

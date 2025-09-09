@@ -3,7 +3,7 @@ import { MaterialService } from './material.service';
 import { MaterialController } from './material.controller';
 import { CatalogController } from './catalog.controller';
 import { SearchController } from './search.controller';
-import { PrismaService } from '../../database';
+import { PrismaService } from '@database/prisma.service';
 
 @Module({
   controllers: [MaterialController, CatalogController, SearchController],

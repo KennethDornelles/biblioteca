@@ -14,6 +14,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { EventsModule } from './events/events.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { DatabaseModule } from './database/database.module';
+import { GuardsModule } from './common/guards/guards.module';
 import { EnvironmentVariables } from './config';
 
 // Validação simplificada temporariamente
@@ -57,6 +59,8 @@ const simpleValidate = (config: Record<string, unknown>) => {
         },
       ],
     }),
+    DatabaseModule, // Módulo de banco de dados deve ser importado primeiro
+    GuardsModule, // Módulo de guards deve ser importado antes dos módulos que os usam
     EventsModule, // Módulo de eventos deve ser importado primeiro
     AuthModule, 
     UserModule, 

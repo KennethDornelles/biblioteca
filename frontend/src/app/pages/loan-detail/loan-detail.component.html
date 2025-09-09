@@ -1,0 +1,175 @@
+<div class="loan-detail-container">
+  <!-- Header -->
+  <div class="loan-detail-header">
+    <button class="btn btn-outline" (click)="goBack()">
+      <i class="icon">←</i>
+      Voltar
+    </button>
+    <h1>Detalhes do Empréstimo</h1>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="editLoan()" *ngIf="loan">
+        <i class="icon">✏️</i>
+        Editar
+      </button>
+      <button class="btn btn-danger" (click)="deleteLoan()" *ngIf="loan">
+        <i class="icon">🗑️</i>
+        Excluir
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Carregando empréstimo...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadLoan()">Tentar Novamente</button>
+  </div>
+
+  <!-- Loan Details -->
+  <div *ngIf="loan && !loading && !error" class="loan-detail-content">
+    <!-- Status Banner -->
+    <div class="status-banner" [ngClass]="getStatusClass(loan.status)">
+      <div class="status-content">
+        <div class="status-icon">
+          <span *ngIf="loan.status === 'ACTIVE'">🔄</span>
+          <span *ngIf="loan.status === 'RETURNED'">✅</span>
+          <span *ngIf="loan.status === 'OVERDUE'">⚠️</span>
+          <span *ngIf="loan.status === 'LOST'">❌</span>
+        </div>
+        <div class="status-info">
+          <h2>{{ getStatusLabel(loan.status) }}</h2>
+          <p *ngIf="isOverdue(loan)" class="overdue-warning">
+            {{ getOverdueDays() }} dias em atraso
+          </p>
+          <p *ngIf="!isOverdue(loan) && loan.status === 'ACTIVE'" class="remaining-days">
+            {{ getRemainingDays() }} dias restantes
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="loan-detail-grid">
+      <!-- Material Information -->
+      <div class="detail-section">
+        <h3>Informações do Material</h3>
+        <div class="material-card">
+          <div class="material-cover" *ngIf="loan.material.coverImage">
+            <img [src]="loan.material.coverImage" [alt]="loan.material.title">
+          </div>
+          <div class="material-info">
+            <h4>{{ loan.material.title }}</h4>
+            <p class="author">{{ loan.material.author }}</p>
+            <p *ngIf="loan.material.isbn" class="isbn">ISBN: {{ loan.material.isbn }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Information -->
+      <div class="detail-section">
+        <h3>Informações do Usuário</h3>
+        <div class="user-card">
+          <div class="user-avatar">
+            <span>{{ loan.user.name.charAt(0).toUpperCase() }}</span>
+          </div>
+          <div class="user-info">
+            <h4>{{ loan.user.name }}</h4>
+            <p>{{ loan.user.email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loan Timeline -->
+      <div class="detail-section">
+        <h3>Timeline do Empréstimo</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-marker active"></div>
+            <div class="timeline-content">
+              <h4>Empréstimo Realizado</h4>
+              <p>{{ formatDate(loan.loanDate) }}</p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-marker" [ngClass]="{ 'overdue': isOverdue(loan), 'active': loan.status === 'ACTIVE' }"></div>
+            <div class="timeline-content">
+              <h4>Data de Vencimento</h4>
+              <p>{{ formatDate(loan.dueDate) }}</p>
+              <p *ngIf="isOverdue(loan)" class="overdue-text">
+                {{ getOverdueDays() }} dias em atraso
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item" *ngIf="loan.returnDate">
+            <div class="timeline-marker completed"></div>
+            <div class="timeline-content">
+              <h4>Devolução Realizada</h4>
+              <p>{{ formatDate(loan.returnDate) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loan Statistics -->
+      <div class="detail-section">
+        <h3>Estatísticas</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">{{ getLoanDuration() }}</div>
+            <div class="stat-label">Dias de Empréstimo</div>
+          </div>
+          <div class="stat-item" *ngIf="isOverdue(loan)">
+            <div class="stat-value overdue">{{ getOverdueDays() }}</div>
+            <div class="stat-label">Dias em Atraso</div>
+          </div>
+          <div class="stat-item" *ngIf="!isOverdue(loan) && loan.status === 'ACTIVE'">
+            <div class="stat-value remaining">{{ getRemainingDays() }}</div>
+            <div class="stat-label">Dias Restantes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Information -->
+      <div class="detail-section" *ngIf="loan.notes">
+        <h3>Observações</h3>
+        <div class="notes-card">
+          <p>{{ loan.notes }}</p>
+        </div>
+      </div>
+
+      <!-- System Information -->
+      <div class="detail-section">
+        <h3>Informações do Sistema</h3>
+        <div class="system-info">
+          <div class="info-item">
+            <span class="label">ID do Empréstimo:</span>
+            <span class="value">{{ loan.id }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Criado em:</span>
+            <span class="value">{{ formatDate(loan.createdAt) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Última atualização:</span>
+            <span class="value">{{ formatDate(loan.updatedAt) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="loan-actions" *ngIf="loan.status === 'ACTIVE'">
+      <button class="btn btn-success btn-large" (click)="returnLoan()">
+        <i class="icon">↩️</i>
+        Devolver Empréstimo
+      </button>
+    </div>
+  </div>
+</div>

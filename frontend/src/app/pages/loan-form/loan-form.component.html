@@ -1,0 +1,162 @@
+<div class="loan-form-container">
+  <!-- Header -->
+  <div class="loan-form-header">
+    <button class="btn btn-outline" (click)="goBack()">
+      <i class="icon">←</i>
+      Voltar
+    </button>
+    <h1>{{ isEditMode ? 'Editar Empréstimo' : 'Novo Empréstimo' }}</h1>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Carregando empréstimo...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="isEditMode ? loadLoan() : ngOnInit()">
+      Tentar Novamente
+    </button>
+  </div>
+
+  <!-- Form -->
+  <div *ngIf="!loading && !error" class="loan-form-content">
+    <form [formGroup]="loanForm" (ngSubmit)="onSubmit()" class="loan-form">
+      <div class="form-grid">
+        <!-- Material Selection -->
+        <div class="form-group">
+          <label for="materialId" class="form-label">
+            Material <span class="required">*</span>
+          </label>
+          <div class="search-container">
+            <input
+              type="text"
+              class="form-input"
+              [class.invalid]="isFieldInvalid('materialId')"
+              placeholder="Buscar material..."
+              [(ngModel)]="materialSearchTerm"
+              [ngModelOptions]="{standalone: true}"
+              (focus)="materialSearchTerm = ''"
+            />
+            <div class="search-results" *ngIf="materialSearchTerm">
+              <div
+                *ngFor="let material of filteredMaterials"
+                class="search-result-item"
+                (click)="onMaterialSelect(material)"
+              >
+                <div class="material-cover" *ngIf="material.coverImage">
+                  <img [src]="material.coverImage" [alt]="material.title">
+                </div>
+                <div class="material-info">
+                  <h4>{{ material.title }}</h4>
+                  <p>{{ material.author }}</p>
+                  <p *ngIf="material.isbn" class="isbn">ISBN: {{ material.isbn }}</p>
+                </div>
+              </div>
+              <div *ngIf="filteredMaterials.length === 0" class="no-results">
+                Nenhum material encontrado
+              </div>
+            </div>
+          </div>
+          <div *ngIf="isFieldInvalid('materialId')" class="field-error">
+            {{ getFieldError('materialId') }}
+          </div>
+        </div>
+
+        <!-- User Selection -->
+        <div class="form-group">
+          <label for="userId" class="form-label">
+            Usuário <span class="required">*</span>
+          </label>
+          <div class="search-container">
+            <input
+              type="text"
+              class="form-input"
+              [class.invalid]="isFieldInvalid('userId')"
+              placeholder="Buscar usuário..."
+              [(ngModel)]="userSearchTerm"
+              [ngModelOptions]="{standalone: true}"
+              (focus)="userSearchTerm = ''"
+            />
+            <div class="search-results" *ngIf="userSearchTerm">
+              <div
+                *ngFor="let user of filteredUsers"
+                class="search-result-item"
+                (click)="onUserSelect(user)"
+              >
+                <div class="user-avatar">
+                  <span>{{ user.name.charAt(0).toUpperCase() }}</span>
+                </div>
+                <div class="user-info">
+                  <h4>{{ user.name }}</h4>
+                  <p>{{ user.email }}</p>
+                </div>
+              </div>
+              <div *ngIf="filteredUsers.length === 0" class="no-results">
+                Nenhum usuário encontrado
+              </div>
+            </div>
+          </div>
+          <div *ngIf="isFieldInvalid('userId')" class="field-error">
+            {{ getFieldError('userId') }}
+          </div>
+        </div>
+
+        <!-- Due Date -->
+        <div class="form-group">
+          <label for="dueDate" class="form-label">
+            Data de Vencimento <span class="required">*</span>
+          </label>
+          <input
+            type="date"
+            id="dueDate"
+            formControlName="dueDate"
+            class="form-input"
+            [class.invalid]="isFieldInvalid('dueDate')"
+            [min]="getMinDate()"
+            [max]="getMaxDate()"
+          />
+          <div *ngIf="isFieldInvalid('dueDate')" class="field-error">
+            {{ getFieldError('dueDate') }}
+          </div>
+          <div class="field-help">
+            A data de vencimento deve ser pelo menos 1 dia no futuro
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group full-width">
+          <label for="notes" class="form-label">Observações</label>
+          <textarea
+            id="notes"
+            formControlName="notes"
+            class="form-textarea"
+            rows="4"
+            placeholder="Observações adicionais sobre o empréstimo..."
+          ></textarea>
+          <div class="field-help">
+            Informações adicionais sobre o empréstimo (opcional)
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" (click)="goBack()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="saving || loanForm.invalid"
+        >
+          <span *ngIf="saving" class="spinner-small"></span>
+          {{ saving ? 'Salvando...' : (isEditMode ? 'Atualizar' : 'Criar') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

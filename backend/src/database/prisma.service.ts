@@ -10,10 +10,23 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
-    await this.$connect();
+    try {
+      console.log('🔍 PrismaService - Iniciando conexão com banco...');
+      await this.$connect();
+      console.log('✅ PrismaService - Conexão estabelecida com sucesso');
+    } catch (error) {
+      console.error('❌ PrismaService - Erro ao conectar com banco:', error);
+      throw error;
+    }
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    try {
+      console.log('🔍 PrismaService - Desconectando do banco...');
+      await this.$disconnect();
+      console.log('✅ PrismaService - Desconexão realizada com sucesso');
+    } catch (error) {
+      console.error('❌ PrismaService - Erro ao desconectar:', error);
+    }
   }
 }

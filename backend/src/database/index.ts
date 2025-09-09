@@ -1,6 +1,7 @@
 // Configurações centralizadas do banco de dados
 export * from './prisma.config';
 export * from './prisma.service';
+export * from './database.module';
 
 // Re-exportações para facilitar o uso
 export { default as databaseConfig } from './database.config';

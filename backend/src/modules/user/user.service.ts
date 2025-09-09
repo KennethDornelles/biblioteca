@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
-import { PrismaClient, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { UserType, StudentLevel } from '../../enums';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -11,17 +11,15 @@ import * as bcrypt from 'bcryptjs';
 import { Prisma } from '@prisma/client';
 import { AUTH_CONFIG } from '../../config/auth.config';
 import { EventBusService, EventFactoryService } from '../../events';
+import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class UserService {
-  private prisma: PrismaClient;
-
   constructor(
+    private readonly prisma: PrismaService,
     private readonly eventBus: EventBusService,
     private readonly eventFactory: EventFactoryService,
-  ) {
-    this.prisma = new PrismaClient();
-  }
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     // Verificar se o email já existe
@@ -84,36 +82,41 @@ export class UserService {
   }
 
   async findAll(filters: UserFiltersDto): Promise<PaginatedUsersDto> {
-    const { page = 1, limit = 10, ...filterFields } = filters;
-    const skip = (page - 1) * limit;
+    try {
+      const { page = 1, limit = 10, ...filterFields } = filters;
+      const skip = (page - 1) * limit;
 
-    // Construir filtros do Prisma
-    const where = this.buildWhereClause(filterFields);
+      // Construir filtros do Prisma
+      const where = this.buildWhereClause(filterFields);
 
-    // Buscar usuários com paginação
-    const [users, total] = await Promise.all([
-      this.prisma.user.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' }
-      }),
-      this.prisma.user.count({ where })
-    ]);
+      // Buscar usuários com paginação
+      const [users, total] = await Promise.all([
+        this.prisma.user.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' }
+        }),
+        this.prisma.user.count({ where })
+      ]);
 
-    const totalPages = Math.ceil(total / limit);
-    const hasNextPage = page < totalPages;
-    const hasPrevPage = page > 1;
+      const totalPages = Math.ceil(total / limit);
+      const hasNextPage = page < totalPages;
+      const hasPrevPage = page > 1;
 
-    return {
-      data: users.map(user => this.mapToResponseDto(user)),
-      page,
-      limit,
-      total,
-      totalPages,
-      hasNextPage,
-      hasPrevPage
-    };
+      return {
+        data: users.map(user => this.mapToResponseDto(user)),
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNextPage,
+        hasPrevPage
+      };
+    } catch (error) {
+      console.error('❌ Erro no UserService.findAll:', error);
+      throw error;
+    }
   }
 
   async findOne(id: string): Promise<UserResponseDto> {
@@ -472,7 +475,4 @@ export class UserService {
     };
   }
 
-  async onModuleDestroy() {
-    await this.prisma.$disconnect();
-  }
 }

@@ -31,16 +31,18 @@
 
       <!-- Dashboard Cards -->
       <section class="dashboard-cards">
-        <div 
-          *ngFor="let card of dashboardCards" 
+        <div
+          *ngFor="let card of dashboardCards"
           class="dashboard-card"
           [class]="'card-' + card.color"
+          [class.disabled]="card.route === '/reservations' || card.route === '/fines' || card.route === '/history'"
           (click)="navigateTo(card.route)"
         >
           <div class="card-icon">{{ card.icon }}</div>
           <div class="card-content">
             <h3>{{ card.title }}</h3>
             <span class="card-value">{{ card.value }}</span>
+            <span *ngIf="card.route === '/reservations' || card.route === '/fines' || card.route === '/history'" class="card-note">Em breve</span>
           </div>
           <div class="card-arrow">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -54,8 +56,8 @@
       <section class="recent-activities">
         <h3>Atividades Recentes</h3>
         <div class="activities-list">
-          <div 
-            *ngFor="let activity of recentActivities" 
+          <div
+            *ngFor="let activity of recentActivities"
             class="activity-item"
             [class]="getStatusClass(activity.status)"
           >

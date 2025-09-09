@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../database';
+import { PrismaService } from '@database/prisma.service';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { SearchMaterialDto } from './dto/search-material.dto';
@@ -313,8 +313,7 @@ export class MaterialService {
       const material = await this.prisma.material.create({
         data: {
           ...createMaterialDto,
-          acquisitionValue: createMaterialDto.acquisitionValue ? 
-            createMaterialDto.acquisitionValue.toString() : undefined
+          acquisitionValue: createMaterialDto.acquisitionValue?.toString()
         }
       });
 
@@ -466,8 +465,7 @@ export class MaterialService {
         where: { id },
         data: {
           ...updateMaterialDto,
-          acquisitionValue: updateMaterialDto.acquisitionValue ? 
-            updateMaterialDto.acquisitionValue.toString() : undefined
+          acquisitionValue: updateMaterialDto.acquisitionValue?.toString()
         }
       });
 

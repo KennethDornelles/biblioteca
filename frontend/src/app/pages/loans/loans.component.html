@@ -1,0 +1,194 @@
+<div class="loans-container">
+  <!-- Header -->
+  <div class="loans-header">
+    <div class="header-content">
+      <h1>Empréstimos</h1>
+      <button class="btn btn-primary" (click)="createLoan()">
+        <i class="icon">➕</i>
+        Novo Empréstimo
+      </button>
+    </div>
+  </div>
+
+  <!-- Estatísticas -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+    <div class="stat-card active">
+      <div class="stat-icon">🔄</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ stats.active }}</div>
+        <div class="stat-label">Ativos</div>
+      </div>
+    </div>
+    <div class="stat-card overdue">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ stats.overdue }}</div>
+        <div class="stat-label">Atrasados</div>
+      </div>
+    </div>
+    <div class="stat-card returned">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ stats.returned }}</div>
+        <div class="stat-label">Devolvidos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="filters-content">
+      <div class="filter-group">
+        <label for="statusFilter">Status:</label>
+        <select id="statusFilter" [(ngModel)]="filters.status" (change)="applyFilters()">
+          <option *ngFor="let option of statusOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="itemsPerPage">Itens por página:</label>
+        <select id="itemsPerPage" [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+
+      <button class="btn btn-secondary" (click)="clearFilters()">
+        Limpar Filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Carregando empréstimos...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadLoans()">Tentar Novamente</button>
+  </div>
+
+  <!-- Lista de Empréstimos -->
+  <div *ngIf="!loading && !error" class="loans-list">
+    <div *ngIf="filteredLoans.length === 0" class="empty-state">
+      <div class="empty-icon">📚</div>
+      <h3>Nenhum empréstimo encontrado</h3>
+      <p>Não há empréstimos que correspondam aos filtros selecionados.</p>
+    </div>
+
+    <div *ngFor="let loan of filteredLoans" class="loan-card">
+      <div class="loan-header">
+        <div class="loan-info">
+          <h3 class="material-title">{{ loan.material.title }}</h3>
+          <p class="material-author">{{ loan.material.author }}</p>
+          <p class="user-info">{{ loan.user.name }} ({{ loan.user.email }})</p>
+        </div>
+        <div class="loan-status">
+          <span class="status-badge" [ngClass]="getStatusClass(loan.status)">
+            {{ getStatusLabel(loan.status) }}
+          </span>
+          <div *ngIf="isOverdue(loan)" class="overdue-warning">
+            ⚠️ {{ getDaysOverdue(loan) }} dias em atraso
+          </div>
+        </div>
+      </div>
+
+      <div class="loan-details">
+        <div class="detail-item">
+          <span class="label">Data do Empréstimo:</span>
+          <span class="value">{{ formatDate(loan.loanDate) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Data de Vencimento:</span>
+          <span class="value" [ngClass]="{ 'overdue': isOverdue(loan) }">
+            {{ formatDate(loan.dueDate) }}
+          </span>
+        </div>
+        <div *ngIf="loan.returnDate" class="detail-item">
+          <span class="label">Data de Devolução:</span>
+          <span class="value">{{ formatDate(loan.returnDate) }}</span>
+        </div>
+        <div *ngIf="loan.notes" class="detail-item">
+          <span class="label">Observações:</span>
+          <span class="value">{{ loan.notes }}</span>
+        </div>
+      </div>
+
+      <div class="loan-actions">
+        <button class="btn btn-sm btn-outline" (click)="viewLoan(loan)">
+          <i class="icon">👁️</i>
+          Ver Detalhes
+        </button>
+        <button class="btn btn-sm btn-outline" (click)="editLoan(loan)">
+          <i class="icon">✏️</i>
+          Editar
+        </button>
+        <button
+          *ngIf="loan.status === 'ACTIVE'"
+          class="btn btn-sm btn-success"
+          (click)="returnLoan(loan)"
+        >
+          <i class="icon">↩️</i>
+          Devolver
+        </button>
+        <button class="btn btn-sm btn-danger" (click)="deleteLoan(loan)">
+          <i class="icon">🗑️</i>
+          Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginação -->
+  <div *ngIf="!loading && !error && totalPages > 1" class="pagination">
+    <button
+      class="btn btn-outline"
+      [disabled]="currentPage === 1"
+      (click)="onPageChange(currentPage - 1)"
+    >
+      Anterior
+    </button>
+
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of getPageNumbers()"
+        class="btn btn-outline"
+        [ngClass]="{ 'active': page === currentPage }"
+        (click)="onPageChange(page)"
+      >
+        {{ page }}
+      </button>
+    </div>
+
+    <button
+      class="btn btn-outline"
+      [disabled]="currentPage === totalPages"
+      (click)="onPageChange(currentPage + 1)"
+    >
+      Próxima
+    </button>
+  </div>
+
+  <!-- Informações de paginação -->
+  <div *ngIf="!loading && !error" class="pagination-info">
+    <p>
+      Mostrando {{ (currentPage - 1) * itemsPerPage + 1 }} a
+      {{ Math.min(currentPage * itemsPerPage, totalItems) }} de
+      {{ totalItems }} empréstimos
+    </p>
+  </div>
+</div>

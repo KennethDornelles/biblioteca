@@ -129,6 +129,16 @@
   align-items: center;
   gap: 1rem;
   position: relative;
+
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    &:hover {
+      transform: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+  }
   overflow: hidden;
 
   &:hover {
@@ -187,6 +197,15 @@
       font-size: 2rem;
       font-weight: 700;
       color: #4a5568;
+    }
+
+    .card-note {
+      font-size: 0.75rem;
+      color: #e53e3e;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 0.25rem;
     }
   }
 

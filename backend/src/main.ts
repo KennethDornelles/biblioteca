@@ -7,6 +7,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { setupSwagger } from './config/swagger.config';
 import { EnvironmentVariables } from './config/environment.config';
+import { HttpExceptionFilter } from './filters';
+import { ResponseInterceptor } from './interceptors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -38,6 +40,12 @@ async function bootstrap() {
     transform: true, // Transforma tipos automaticamente
     disableErrorMessages: process.env.NODE_ENV === 'production', // Remove mensagens detalhadas em produção
   }));
+
+  // Filtro global de exceções para tratamento padronizado de erros
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  // Interceptor global para padronizar respostas de sucesso
+  app.useGlobalInterceptors(new ResponseInterceptor());
   
   // CORS avançado com configurações de segurança
   app.enableCors({
